@@ -11,19 +11,22 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #e0fbfc; /* Light blue-green for Cayman theme */
+            background-color: #1f2937; /* Dark blue-gray for a darker theme */
+            color: #d1d5db; /* Light gray text for readability */
         }
         .form-input {
             width: 100%;
             padding: 0.75rem;
             border-radius: 0.5rem;
-            border: 1px solid #a0e1f3;
+            border: 1px solid #4b5563; /* Darker border */
+            background-color: #374151; /* Match main background */
+            color: #f3f4f6; /* Lighter text color */
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .form-input:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+            border-color: #3b82f6; /* Blue for focus */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
         }
         .btn {
             padding: 0.75rem 1.5rem;
@@ -34,79 +37,95 @@
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .message-box {
+            background-color: rgba(55, 65, 81, 0.5);
+            color: #d1d5db;
+        }
+        .message-box.success {
+            background-color: rgba(16, 185, 129, 0.5); /* Semi-transparent green */
+            color: #d1fae5;
+        }
+        .message-box.error {
+            background-color: rgba(239, 68, 68, 0.5); /* Semi-transparent red */
+            color: #fee2e2;
+        }
+        .message-box.info {
+            background-color: rgba(59, 130, 246, 0.5); /* Semi-transparent blue */
+            color: #dbeafe;
         }
     </style>
 </head>
 <body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
 
-    <main class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 sm:p-10">
-        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">Time Logger</h1>
-        <p class="text-center text-gray-500 mb-8">
+    <main class="w-full max-w-2xl bg-[#374151] rounded-xl shadow-2xl p-6 sm:p-10">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-100 mb-6">Time Logger</h1>
+        <p class="text-center text-gray-400 mb-8">
             Click the buttons below to automatically log your time and send data to the webhook.
         </p>
         
         <!-- New element to display the current time -->
-        <div id="current-time" class="text-xl sm:text-2xl font-bold text-gray-600 text-center mb-4"></div>
+        <div id="current-time" class="text-xl sm:text-2xl font-bold text-gray-300 text-center mb-4"></div>
 
         <form id="time-logger-form" class="space-y-6">
             <div>
-                <label for="employee_name" class="block text-sm font-medium text-gray-700 mb-1">Employee Name</label>
+                <label for="employee_name" class="block text-sm font-medium text-gray-300 mb-1">Employee Name</label>
                 <input type="text" id="employee_name" name="employee_name" placeholder="John Doe" class="form-input" required>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Time In</label>
-                    <button type="button" id="time-in-btn" class="w-full btn bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-300">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Time In</label>
+                    <button type="button" id="time-in-btn" class="w-full btn bg-emerald-700 hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-500">
                         Log Time In
                     </button>
-                    <div id="time-in-display" class="mt-2 text-center text-gray-500 italic"></div>
+                    <div id="time-in-display" class="mt-2 text-center text-gray-400 italic"></div>
                     <input type="hidden" id="time_in" name="time_in">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Out</label>
-                    <button type="button" id="time-out-btn" class="w-full btn bg-orange-400 cursor-not-allowed" disabled>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Time Out</label>
+                    <button type="button" id="time-out-btn" class="w-full btn bg-orange-700 cursor-not-allowed" disabled>
                         Log Time Out
                     </button>
-                    <div id="time-out-display" class="mt-2 text-center text-gray-500 italic"></div>
+                    <div id="time-out-display" class="mt-2 text-center text-gray-400 italic"></div>
                     <input type="hidden" id="time_out" name="time_out">
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Breaks</label>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Breaks</label>
                 <div class="grid grid-cols-2 gap-4">
-                    <button type="button" id="break-start-btn" class="btn bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-4 focus:ring-cyan-300">
+                    <button type="button" id="break-start-btn" class="btn bg-cyan-700 hover:bg-cyan-600 focus:outline-none focus:ring-4 focus:ring-cyan-500">
                         Start Break
                     </button>
-                    <button type="button" id="break-end-btn" class="btn bg-cyan-400 cursor-not-allowed" disabled>
+                    <button type="button" id="break-end-btn" class="btn bg-cyan-500 cursor-not-allowed" disabled>
                         End Break
                     </button>
                 </div>
-                <div id="breaks-display" class="mt-2 text-center text-gray-500 italic"></div>
+                <div id="breaks-display" class="mt-2 text-center text-gray-400 italic"></div>
                 <input type="hidden" id="breaks" name="breaks">
             </div>
 
             <div>
-                <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <label for="location" class="block text-sm font-medium text-gray-300 mb-1">Location</label>
                 <input type="hidden" id="location" name="location">
-                <div id="location-display" class="mt-2 text-center text-gray-500 italic">Location will be automatically logged.</div>
+                <div id="location-display" class="mt-2 text-center text-gray-400 italic">Location will be automatically logged.</div>
             </div>
 
             <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <label for="notes" class="block text-sm font-medium text-gray-300 mb-1">Notes</label>
                 <textarea id="notes" name="notes" rows="3" placeholder="Add any relevant notes here." class="form-input"></textarea>
             </div>
 
             <div class="space-y-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Camera Capture (Automatic)</label>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Camera Capture (Automatic)</label>
                 <input type="hidden" id="camera_capture" name="camera_capture">
-                <div id="camera-message" class="text-sm text-center text-gray-500 italic"></div>
+                <div id="camera-message" class="text-sm text-center text-gray-400 italic"></div>
             </div>
         </form>
 
-        <div id="message-box" class="mt-8 p-4 rounded-lg text-center font-medium hidden"></div>
+        <div id="message-box" class="mt-8 p-4 rounded-lg text-center font-medium hidden message-box"></div>
 
     </main>
 
@@ -143,13 +162,13 @@
 
             // Function to display messages in the message box
             function showMessage(message, type) {
-                messageBox.classList.remove('hidden', 'bg-red-200', 'text-red-800', 'bg-green-200', 'text-green-800', 'bg-blue-200', 'text-blue-800');
+                messageBox.classList.remove('hidden', 'success', 'error', 'info');
                 if (type === 'success') {
-                    messageBox.classList.add('bg-green-200', 'text-green-800');
+                    messageBox.classList.add('success');
                 } else if (type === 'error') {
-                    messageBox.classList.add('bg-red-200', 'text-red-800');
+                    messageBox.classList.add('error');
                 } else if (type === 'info') {
-                    messageBox.classList.add('bg-blue-200', 'text-blue-800');
+                    messageBox.classList.add('info');
                 }
                 messageBox.textContent = message;
             }
@@ -162,6 +181,22 @@
                 cameraMessage.textContent = 'Capture simulated. A placeholder image URL has been generated.';
             }
 
+            // New function to format date and time for the webhook
+            function formatDateTimeForWebhook(isoString) {
+                const date = new Date(isoString);
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+                
+                return {
+                    date: `${year}-${month}-${day}`,
+                    time: `${hours}:${minutes}:${seconds}`
+                };
+            }
+
             // --- Updated function to send a single, complete log on Time Out ---
             async function sendCompleteLog() {
                 if (webhookUrl.includes('replace-me-with-your-real-url')) {
@@ -171,14 +206,20 @@
                     return;
                 }
 
+                const timeInFormatted = formatDateTimeForWebhook(appState.timeInLogged);
+                const timeOutFormatted = formatDateTimeForWebhook(appState.timeOutLogged);
+
                 // Gather all the stored data
                 const logData = {
                     employee_name: document.getElementById('employee_name').value,
-                    time_in: appState.timeInLogged,
-                    time_out: appState.timeOutLogged,
+                    time_in_date: timeInFormatted.date,
+                    time_in_time: timeInFormatted.time,
+                    time_out_date: timeOutFormatted.date,
+                    time_out_time: timeOutFormatted.time,
                     total_break_minutes: appState.breaksTotal,
                     location: locationInput.value,
                     camera_capture: cameraInput.value,
+                    notes: document.getElementById('notes').value
                 };
                 
                 // Construct the URL with query parameters
@@ -233,47 +274,47 @@
             function updateButtonStates() {
                 if (appState.timeInLogged) {
                     timeInBtn.disabled = true;
-                    timeInBtn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'focus:ring-emerald-300');
-                    timeInBtn.classList.add('bg-emerald-400', 'cursor-not-allowed');
+                    timeInBtn.classList.remove('bg-emerald-700', 'hover:bg-emerald-600', 'focus:ring-emerald-500');
+                    timeInBtn.classList.add('bg-emerald-500', 'cursor-not-allowed');
                 } else {
                     timeInBtn.disabled = false;
-                    timeInBtn.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'focus:ring-emerald-300');
-                    timeInBtn.classList.remove('bg-emerald-400', 'cursor-not-allowed');
+                    timeInBtn.classList.add('bg-emerald-700', 'hover:bg-emerald-600', 'focus:ring-emerald-500');
+                    timeInBtn.classList.remove('bg-emerald-500', 'cursor-not-allowed');
                 }
                 
                 if (appState.timeInLogged && !appState.timeOutLogged) {
                     timeOutBtn.disabled = false;
-                    timeOutBtn.classList.remove('bg-orange-400', 'cursor-not-allowed');
-                    timeOutBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'focus:ring-orange-300');
+                    timeOutBtn.classList.remove('bg-orange-700', 'cursor-not-allowed');
+                    timeOutBtn.classList.add('bg-orange-700', 'hover:bg-orange-600', 'focus:ring-orange-500');
                 } else {
                     timeOutBtn.disabled = true;
-                    timeOutBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'focus:ring-orange-300');
-                    timeOutBtn.classList.add('bg-orange-400', 'cursor-not-allowed');
+                    timeOutBtn.classList.remove('bg-orange-700', 'hover:bg-orange-600', 'focus:ring-orange-500');
+                    timeOutBtn.classList.add('bg-orange-500', 'cursor-not-allowed');
                 }
 
                 if (appState.timeInLogged && !appState.timeOutLogged) {
                     if (appState.breakActive) {
                         breakStartBtn.disabled = true;
-                        breakStartBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
-                        breakStartBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
+                        breakStartBtn.classList.remove('bg-cyan-700', 'hover:bg-cyan-600', 'focus:ring-cyan-500');
+                        breakStartBtn.classList.add('bg-cyan-500', 'cursor-not-allowed');
                         breakEndBtn.disabled = false;
-                        breakEndBtn.classList.remove('bg-cyan-400', 'cursor-not-allowed');
-                        breakEndBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
+                        breakEndBtn.classList.remove('bg-cyan-500', 'cursor-not-allowed');
+                        breakEndBtn.classList.add('bg-cyan-700', 'hover:bg-cyan-600', 'focus:ring-cyan-500');
                     } else {
                         breakStartBtn.disabled = false;
-                        breakStartBtn.classList.remove('bg-cyan-400', 'cursor-not-allowed');
-                        breakStartBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
+                        breakStartBtn.classList.remove('bg-cyan-500', 'cursor-not-allowed');
+                        breakStartBtn.classList.add('bg-cyan-700', 'hover:bg-cyan-600', 'focus:ring-cyan-500');
                         breakEndBtn.disabled = true;
-                        breakEndBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
-                        breakEndBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
+                        breakEndBtn.classList.remove('bg-cyan-700', 'hover:bg-cyan-600', 'focus:ring-cyan-500');
+                        breakEndBtn.classList.add('bg-cyan-500', 'cursor-not-allowed');
                     }
                 } else {
                     breakStartBtn.disabled = true;
-                    breakStartBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
-                    breakStartBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
+                    breakStartBtn.classList.remove('bg-cyan-700', 'hover:bg-cyan-600', 'focus:ring-cyan-500');
+                    breakStartBtn.classList.add('bg-cyan-500', 'cursor-not-allowed');
                     breakEndBtn.disabled = true;
-                    breakEndBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
-                    breakEndBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
+                    breakEndBtn.classList.remove('bg-cyan-700', 'hover:bg-cyan-600', 'focus:ring-cyan-500');
+                    breakEndBtn.classList.add('bg-cyan-500', 'cursor-not-allowed');
                 }
 
                 if (appState.timeInLogged) {
