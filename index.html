@@ -315,6 +315,7 @@
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
+                            console.log('Geolocation success!');
                             const lat = position.coords.latitude;
                             const lon = position.coords.longitude;
                             locationInput.value = `${lat},${lon}`;
@@ -323,16 +324,30 @@
                             timeInLoggedWithLocation();
                         },
                         (error) => {
-                            console.error('Geolocation request failed:', error);
-                            locationInput.value = 'Location access denied or unknown.';
-                            locationDisplay.textContent = 'Location access denied or unknown.';
+                            let errorMessage = 'Location access denied.';
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMessage = "Location access was denied by the user.";
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMessage = "Location information is unavailable.";
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMessage = "The request to get user location timed out.";
+                                    break;
+                            }
+                            console.error('Geolocation request failed:', errorMessage, error);
+                            locationInput.value = errorMessage;
+                            locationDisplay.textContent = errorMessage;
                             // Proceed with logging even if location fails
                             timeInLoggedWithLocation();
                         }
                     );
                 } else {
-                    locationInput.value = 'Geolocation not supported by browser.';
-                    locationDisplay.textContent = 'Geolocation not supported by browser.';
+                    const errorMessage = 'Geolocation is not supported by this browser.';
+                    console.error(errorMessage);
+                    locationInput.value = errorMessage;
+                    locationDisplay.textContent = errorMessage;
                     // Proceed with logging
                     timeInLoggedWithLocation();
                 }
