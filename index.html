@@ -43,7 +43,7 @@
     <main class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 sm:p-10">
         <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">Time Logger</h1>
         <p class="text-center text-gray-500 mb-8">
-            Click the buttons below to automatically log your time and send data to the webhook.
+            Click the buttons below to automatically log your time and send data to the .
         </p>
         
         <!-- New element to display the current time -->
@@ -137,10 +137,10 @@
 
             const currentTimeDisplay = document.getElementById('current-time');
 
-            // --- IMPORTANT: FIX THE WEBHOOK URL ---
+            // --- IMPORTANT: FIX THE  URL ---
             // The "Failed to fetch" error occurs because this URL is a placeholder.
             // You MUST replace it with the actual URL from your Make.com or similar service.
-            const webhookUrl = "https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih";
+            const Url = "https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih";
 
             // Function to display messages in the message box
             function showMessage(message, type) {
@@ -163,10 +163,11 @@
                 cameraMessage.textContent = 'Capture simulated. A placeholder image URL has been generated.';
             }
 
-            // Function to send data to the webhook
+            // Function to send data to the 
             async function sendLog(logType) {
-                // Check if the webhook URL is the placeholder.
-                if (webhookUrl.includes('replace-me-with-your-real-url')) {
+                
+                // Check if the  URL is the placeholder.
+                if (webhookUrl.includes(https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih)) {
                     const errorMessage = "Error: Please replace the placeholder 'webhookUrl' in the code with your actual webhook URL.";
                     console.error(errorMessage);
                     showMessage(errorMessage, 'error');
@@ -402,4 +403,5 @@
 
 </body>
 </html>
+
 
