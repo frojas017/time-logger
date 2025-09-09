@@ -110,7 +110,7 @@
             <div>
                 <label for="location" class="block text-sm font-medium text-gray-300 mb-1">Location</label>
                 <input type="hidden" id="location" name="location">
-                <div id="location-display" class="mt-2 text-center text-gray-400 italic">Location will be automatically logged.</div>
+                <div id="location-display" class="mt-2 text-center text-gray-400 italic">Getting location...</div>
             </div>
 
             <div>
@@ -157,7 +157,6 @@
             const currentTimeDisplay = document.getElementById('current-time');
             
             // This is the placeholder URL. You must replace it with your actual webhook URL.
-            // For example, if you are using Make.com, you would copy the webhook URL from your scenario and paste it here.
             const webhookUrl = "https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih";
 
             // Function to display messages in the message box
@@ -196,6 +195,18 @@
                     time: `${hours}:${minutes}:${seconds}`
                 };
             }
+            
+            // Function to simulate a reverse geocoding API call
+            async function reverseGeocode(latitude, longitude) {
+                locationDisplay.textContent = 'Converting coordinates to a location name...';
+                // In a real app, you would use a service like Google Maps Geocoding API here.
+                // Replace this with a real API call and your API key.
+                const simulatedLocation = `Makati City, Metro Manila, Philippines`;
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(simulatedLocation), 1500); // Simulate a network delay
+                });
+            }
+
 
             // --- Updated function to send a single, complete log on Time Out ---
             async function sendCompleteLog() {
@@ -211,15 +222,16 @@
 
                 // Gather all the stored data
                 const logData = {
-                    employee_name: document.getElementById('employee_name').value,
-                    time_in_date: timeInFormatted.date,
-                    time_in_time: timeInFormatted.time,
-                    time_out_date: timeOutFormatted.date,
-                    time_out_time: timeOutFormatted.time,
-                    total_break_minutes: appState.breaksTotal,
-                    location: locationInput.value,
-                    camera_capture: cameraInput.value,
-                    notes: document.getElementById('notes').value
+                    // This is the new mapping based on your column headers
+                    A: document.getElementById('employee_name').value,
+                    B: timeInFormatted.date,
+                    C: timeInFormatted.time,
+                    D: timeOutFormatted.date,
+                    E: timeOutFormatted.time,
+                    F: appState.breaksTotal,
+                    G: cameraInput.value,
+                    H: locationInput.value,
+                    I: document.getElementById('notes').value
                 };
                 
                 // Construct the URL with query parameters
@@ -339,13 +351,22 @@
                 return new Promise((resolve, reject) => {
                     if ("geolocation" in navigator) {
                         navigator.geolocation.getCurrentPosition(
-                            (position) => {
+                            async (position) => {
                                 console.log('Geolocation success!');
                                 const lat = position.coords.latitude;
                                 const lon = position.coords.longitude;
-                                locationInput.value = `${lat},${lon}`;
-                                locationDisplay.textContent = `Location: ${lat}, ${lon}`;
-                                resolve();
+                                try {
+                                    const locationName = await reverseGeocode(lat, lon);
+                                    locationInput.value = locationName;
+                                    locationDisplay.textContent = `Location: ${locationName}`;
+                                    resolve();
+                                } catch (error) {
+                                    const errorMessage = 'Failed to convert location to name.';
+                                    console.error(errorMessage, error);
+                                    locationInput.value = errorMessage;
+                                    locationDisplay.textContent = errorMessage;
+                                    resolve(); // Resolve to not block the process
+                                }
                             },
                             (error) => {
                                 let errorMessage = 'Location access denied.';
