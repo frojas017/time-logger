@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #ccfcf8;
+            background-color: #e0fbfc; /* Light blue-green for Cayman theme */
         }
         .form-input {
             width: 100%;
@@ -58,7 +58,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Time In</label>
-                    <button type="button" id="time-in-btn" class="w-full btn bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
+                    <button type="button" id="time-in-btn" class="w-full btn bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-300">
                         Log Time In
                     </button>
                     <div id="time-in-display" class="mt-2 text-center text-gray-500 italic"></div>
@@ -66,7 +66,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Time Out</label>
-                    <button type="button" id="time-out-btn" class="w-full btn bg-red-400 cursor-not-allowed" disabled>
+                    <button type="button" id="time-out-btn" class="w-full btn bg-orange-400 cursor-not-allowed" disabled>
                         Log Time Out
                     </button>
                     <div id="time-out-display" class="mt-2 text-center text-gray-500 italic"></div>
@@ -77,10 +77,10 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Breaks</label>
                 <div class="grid grid-cols-2 gap-4">
-                    <button type="button" id="break-start-btn" class="btn bg-blue-400 cursor-not-allowed" disabled>
+                    <button type="button" id="break-start-btn" class="btn bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-4 focus:ring-cyan-300">
                         Start Break
                     </button>
-                    <button type="button" id="break-end-btn" class="btn bg-blue-400 cursor-not-allowed" disabled>
+                    <button type="button" id="break-end-btn" class="btn bg-cyan-400 cursor-not-allowed" disabled>
                         End Break
                     </button>
                 </div>
@@ -240,25 +240,25 @@
                 // Time In button state
                 if (appState.timeInLogged) {
                     timeInBtn.disabled = true;
-                    timeInBtn.classList.remove('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-300');
-                    timeInBtn.classList.add('bg-green-400', 'cursor-not-allowed');
+                    timeInBtn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'focus:ring-emerald-300');
+                    timeInBtn.classList.add('bg-emerald-400', 'cursor-not-allowed');
                     console.log('Time In button is disabled because a "Time In" event has already been logged today.');
                 } else {
                     timeInBtn.disabled = false;
-                    timeInBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-300');
-                    timeInBtn.classList.remove('bg-green-400', 'cursor-not-allowed');
+                    timeInBtn.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'focus:ring-emerald-300');
+                    timeInBtn.classList.remove('bg-emerald-400', 'cursor-not-allowed');
                 }
                 
                 // Time Out button state
                 // This condition ensures the "Time Out" button is only enabled after "Time In" is logged
                 if (appState.timeInLogged && !appState.timeOutLogged) {
                     timeOutBtn.disabled = false;
-                    timeOutBtn.classList.remove('bg-red-400', 'cursor-not-allowed');
-                    timeOutBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
+                    timeOutBtn.classList.remove('bg-orange-400', 'cursor-not-allowed');
+                    timeOutBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'focus:ring-orange-300');
                 } else {
                     timeOutBtn.disabled = true;
-                    timeOutBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
-                    timeOutBtn.classList.add('bg-red-400', 'cursor-not-allowed');
+                    timeOutBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'focus:ring-orange-300');
+                    timeOutBtn.classList.add('bg-orange-400', 'cursor-not-allowed');
                 }
 
                 // Break button states
@@ -266,29 +266,29 @@
                 if (appState.timeInLogged && !appState.timeOutLogged) {
                     if (appState.breakActive) {
                         breakStartBtn.disabled = true;
-                        breakStartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                        breakStartBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                        breakStartBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
+                        breakStartBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
 
                         breakEndBtn.disabled = false;
-                        breakEndBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
-                        breakEndBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                        breakEndBtn.classList.remove('bg-cyan-400', 'cursor-not-allowed');
+                        breakEndBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
                     } else {
                         breakStartBtn.disabled = false;
-                        breakStartBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
-                        breakStartBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                        breakStartBtn.classList.remove('bg-cyan-400', 'cursor-not-allowed');
+                        breakStartBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
                         
                         breakEndBtn.disabled = true;
-                        breakEndBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                        breakEndBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                        breakEndBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
+                        breakEndBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
                     }
                 } else {
                     breakStartBtn.disabled = true;
-                    breakStartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                    breakStartBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                    breakStartBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
+                    breakStartBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
 
                     breakEndBtn.disabled = true;
-                    breakEndBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                    breakEndBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                    breakEndBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700', 'focus:ring-cyan-300');
+                    breakEndBtn.classList.add('bg-cyan-400', 'cursor-not-allowed');
                 }
 
                 // Update displays from state
