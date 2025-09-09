@@ -7,26 +7,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #3a1e1e; /* Deep, desaturated red */
-            color: #f5e9e9; /* Light off-white */
+            color: #d1d5db; /* A light gray for text */
+            /* Removed solid background color in favor of gradient */
+        }
+        h1 {
+            font-family: 'Permanent Marker', cursive;
+            color: #ff007f; /* Neon pink fill inside the outline */
+            text-shadow: 
+                -2px -2px 0 #fff,  
+                2px -2px 0 #fff,
+                -2px 2px 0 #fff,
+                2px 2px 0 #fff; /* White outline effect */
         }
         .form-input {
             width: 100%;
             padding: 0.75rem;
             border-radius: 0.5rem;
-            border: 1px solid #5c3d3d; /* Dark red border */
-            background-color: #2b1717; /* Dark red background */
-            color: #f5e9e9; /* Light off-white text */
+            border: 1px solid #4a4e69; /* Darker border */
+            background-color: #2b2b48; /* Darker background */
+            color: #d1d5db; /* Light text */
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .form-input:focus {
             outline: none;
-            border-color: #2c2c2c; /* Muted red for focus */
-            box-shadow: 0 0 0 3px rgba(155, 44, 44, 0.5);
+            border-color: #ff007f; /* Neon pink focus */
+            box-shadow: 0 0 0 3px rgba(255, 0, 127, 0.5); /* Neon pink shadow */
         }
         .btn {
             padding: 0.75rem 1.5rem;
@@ -37,14 +46,12 @@
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         .message-box {
-            background-color: rgba(66, 32, 32, 0.5);
-            color: #f5e9e9;
+            color: white;
         }
         .message-box.success {
-            background-color: rgba(29, 102, 70, 0.5); /* Semi-transparent muted green */
+            background-color: rgba(30, 150, 90, 0.5); /* Semi-transparent muted green */
             color: #d1fae5;
         }
         .message-box.error {
@@ -52,76 +59,78 @@
             color: #fee2e2;
         }
         .message-box.info {
-            background-color: rgba(68, 48, 122, 0.5); /* Semi-transparent muted purple */
+            background-color: rgba(60, 80, 160, 0.5); /* Semi-transparent muted blue */
             color: #dbeafe;
         }
     </style>
 </head>
-<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
+<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen" style="background-image: linear-gradient(to bottom, #1a1a2e, #805ad5);">
 
-    <main class="w-full max-w-2xl bg-[#422020] rounded-xl shadow-2xl p-6 sm:p-10">
-        <h1 class="text-3xl sm:text-4xl font-bold text-center text-stone-100 mb-6">Time Logger</h1>
-        <p class="text-center text-stone-400 mb-8">
+    <main class="w-full max-w-2xl bg-[#2b2b48] rounded-xl shadow-2xl p-6 sm:p-10">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6">TIME LOGGER</h1>
+        <p class="text-center text-gray-400 mb-8">
             Click the buttons below to automatically log your time and send data to the webhook.
         </p>
         
         <!-- New element to display the current time -->
-        <div id="current-time" class="text-xl sm:text-2xl font-bold text-stone-300 text-center mb-4"></div>
+        <div id="current-time" class="text-xl sm:text-2xl font-bold text-[#a95ffc] text-center mb-4"></div>
 
         <form id="time-logger-form" class="space-y-6">
             <div>
-                <label for="employee_name" class="block text-sm font-medium text-stone-300 mb-1">Employee Name</label>
+                <label for="employee_name" class="block text-sm font-medium text-gray-400 mb-1">Employee Name</label>
                 <input type="text" id="employee_name" name="employee_name" placeholder="John Doe" class="form-input" required>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-stone-300 mb-1">Time In</label>
-                    <button type="button" id="time-in-btn" class="w-full btn bg-red-800 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500">
-                        Log Time In
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Time In</label>
+                    <button type="button" id="time-in-btn" class="w-full btn bg-[#805ad5] hover:bg-[#6b46c1] focus:outline-none focus:ring-4 focus:ring-[#805ad5]">
+                        LOG TIME IN
                     </button>
-                    <div id="time-in-display" class="mt-2 text-center text-stone-400 italic"></div>
+                    <div id="time-in-display" class="mt-2 text-center text-gray-400 italic"></div>
+                    <!-- No longer using single hidden inputs, but keeping them for now -->
                     <input type="hidden" id="time_in" name="time_in">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-stone-300 mb-1">Time Out</label>
-                    <button type="button" id="time-out-btn" class="w-full btn bg-red-900 cursor-not-allowed" disabled>
-                        Log Time Out
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Time Out</label>
+                    <button type="button" id="time-out-btn" class="w-full btn bg-[#ff007f] hover:bg-[#c90064] focus:outline-none focus:ring-4 focus:ring-[#ff007f] cursor-not-allowed" disabled>
+                        LOG OUT
                     </button>
-                    <div id="time-out-display" class="mt-2 text-center text-stone-400 italic"></div>
+                    <div id="time-out-display" class="mt-2 text-center text-gray-400 italic"></div>
+                    <!-- No longer using single hidden inputs, but keeping them for now -->
                     <input type="hidden" id="time_out" name="time_out">
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-stone-300 mb-1">Breaks</label>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Breaks</label>
                 <div class="grid grid-cols-2 gap-4">
-                    <button type="button" id="break-start-btn" class="btn bg-stone-700 hover:bg-stone-600 focus:outline-none focus:ring-4 focus:ring-stone-500">
-                        Start Break
+                    <button type="button" id="break-start-btn" class="btn bg-[#a95ffc] hover:bg-[#9947e6] focus:outline-none focus:ring-4 focus:ring-[#a95ffc]">
+                        START BREAK
                     </button>
-                    <button type="button" id="break-end-btn" class="btn bg-stone-500 cursor-not-allowed" disabled>
-                        End Break
+                    <button type="button" id="break-end-btn" class="btn bg-[#c90064] hover:bg-[#a1004a] cursor-not-allowed" disabled>
+                        END BREAK
                     </button>
                 </div>
-                <div id="breaks-display" class="mt-2 text-center text-stone-400 italic"></div>
+                <div id="breaks-display" class="mt-2 text-center text-gray-400 italic"></div>
                 <input type="hidden" id="breaks" name="breaks">
             </div>
 
             <div>
-                <label for="location" class="block text-sm font-medium text-stone-300 mb-1">Location</label>
+                <label for="location" class="block text-sm font-medium text-gray-400 mb-1">Location</label>
+                <div id="location-display" class="mt-2 text-center text-gray-400 italic">Getting location...</div>
                 <input type="hidden" id="location" name="location">
-                <div id="location-display" class="mt-2 text-center text-stone-400 italic">Getting location...</div>
             </div>
 
             <div>
-                <label for="notes" class="block text-sm font-medium text-stone-300 mb-1">Notes</label>
+                <label for="notes" class="block text-sm font-medium text-gray-400 mb-1">Notes</label>
                 <textarea id="notes" name="notes" rows="3" placeholder="Add any relevant notes here." class="form-input"></textarea>
             </div>
 
             <div class="space-y-4">
-                <label class="block text-sm font-medium text-stone-300 mb-1">Camera Capture (Automatic)</label>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Camera Capture (Automatic)</label>
                 <input type="hidden" id="camera_capture" name="camera_capture">
-                <div id="camera-message" class="text-sm text-center text-stone-400 italic"></div>
+                <div id="camera-message" class="text-sm text-center text-gray-400 italic"></div>
             </div>
         </form>
 
@@ -156,7 +165,6 @@
 
             const currentTimeDisplay = document.getElementById('current-time');
             
-            // This is the placeholder URL. You must replace it with your actual webhook URL.
             const webhookUrl = "https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih";
 
             // Function to display messages in the message box
@@ -179,8 +187,8 @@
                 cameraInput.value = placeholderUrl;
                 cameraMessage.textContent = 'Capture simulated. A placeholder image URL has been generated.';
             }
-
-            // New function to format date and time for the webhook
+            
+            // --- NEW: Function to format date and time separately ---
             function formatDateTimeForWebhook(isoString) {
                 const date = new Date(isoString);
                 const year = date.getFullYear();
@@ -210,17 +218,10 @@
 
             // --- Updated function to send a single, complete log on Time Out ---
             async function sendCompleteLog() {
-                if (webhookUrl.includes('replace-me-with-your-real-url')) {
-                    const errorMessage = "Error: Please replace the placeholder 'webhookUrl' in the code with your actual webhook URL.";
-                    console.error(errorMessage);
-                    showMessage(errorMessage, 'error');
-                    return;
-                }
-
                 const timeInFormatted = formatDateTimeForWebhook(appState.timeInLogged);
                 const timeOutFormatted = formatDateTimeForWebhook(appState.timeOutLogged);
 
-                // Gather all the stored data
+                // Gather all the stored data, using the correct column mapping from your sheet.
                 const logData = {
                     // This is the new mapping based on your column headers
                     A: document.getElementById('employee_name').value,
@@ -286,56 +287,58 @@
             function updateButtonStates() {
                 if (appState.timeInLogged) {
                     timeInBtn.disabled = true;
-                    timeInBtn.classList.remove('bg-red-800', 'hover:bg-red-700', 'focus:ring-red-500');
-                    timeInBtn.classList.add('bg-red-500', 'cursor-not-allowed');
+                    timeInBtn.classList.remove('bg-[#805ad5]', 'hover:bg-[#6b46c1]', 'focus:ring-[#805ad5]');
+                    timeInBtn.classList.add('bg-[#6b46c1]', 'cursor-not-allowed');
                 } else {
                     timeInBtn.disabled = false;
-                    timeInBtn.classList.add('bg-red-800', 'hover:bg-red-700', 'focus:ring-red-500');
-                    timeInBtn.classList.remove('bg-red-500', 'cursor-not-allowed');
+                    timeInBtn.classList.add('bg-[#805ad5]', 'hover:bg-[#6b46c1]', 'focus:ring-[#805ad5]');
+                    timeInBtn.classList.remove('bg-[#6b46c1]', 'cursor-not-allowed');
                 }
                 
                 if (appState.timeInLogged && !appState.timeOutLogged) {
                     timeOutBtn.disabled = false;
-                    timeOutBtn.classList.remove('bg-red-500', 'cursor-not-allowed');
-                    timeOutBtn.classList.add('bg-red-900', 'hover:bg-red-800', 'focus:ring-red-500');
+                    timeOutBtn.classList.remove('bg-[#c90064]', 'cursor-not-allowed');
+                    timeOutBtn.classList.add('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
                 } else {
                     timeOutBtn.disabled = true;
-                    timeOutBtn.classList.remove('bg-red-900', 'hover:bg-red-800', 'focus:ring-red-500');
-                    timeOutBtn.classList.add('bg-red-500', 'cursor-not-allowed');
+                    timeOutBtn.classList.remove('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
+                    timeOutBtn.classList.add('bg-[#c90064]', 'cursor-not-allowed');
                 }
 
                 if (appState.timeInLogged && !appState.timeOutLogged) {
                     if (appState.breakActive) {
                         breakStartBtn.disabled = true;
-                        breakStartBtn.classList.remove('bg-stone-700', 'hover:bg-stone-600', 'focus:ring-stone-500');
-                        breakStartBtn.classList.add('bg-stone-500', 'cursor-not-allowed');
+                        breakStartBtn.classList.remove('bg-[#a95ffc]', 'hover:bg-[#9947e6]', 'focus:ring-[#a95ffc]');
+                        breakStartBtn.classList.add('bg-[#9947e6]', 'cursor-not-allowed');
                         breakEndBtn.disabled = false;
-                        breakEndBtn.classList.remove('bg-stone-500', 'cursor-not-allowed');
-                        breakEndBtn.classList.add('bg-stone-700', 'hover:bg-stone-600', 'focus:ring-stone-500');
+                        breakEndBtn.classList.remove('bg-[#c90064]', 'cursor-not-allowed');
+                        breakEndBtn.classList.add('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
                     } else {
                         breakStartBtn.disabled = false;
-                        breakStartBtn.classList.remove('bg-stone-500', 'cursor-not-allowed');
-                        breakStartBtn.classList.add('bg-stone-700', 'hover:bg-stone-600', 'focus:ring-stone-500');
+                        breakStartBtn.classList.remove('bg-[#9947e6]', 'cursor-not-allowed');
+                        breakStartBtn.classList.add('bg-[#a95ffc]', 'hover:bg-[#9947e6]', 'focus:ring-[#a95ffc]');
                         breakEndBtn.disabled = true;
-                        breakEndBtn.classList.remove('bg-stone-700', 'hover:bg-stone-600', 'focus:ring-stone-500');
-                        breakEndBtn.classList.add('bg-stone-500', 'cursor-not-allowed');
+                        breakEndBtn.classList.remove('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
+                        breakEndBtn.classList.add('bg-[#c90064]', 'cursor-not-allowed');
                     }
                 } else {
                     breakStartBtn.disabled = true;
-                    breakStartBtn.classList.remove('bg-stone-700', 'hover:bg-stone-600', 'focus:ring-stone-500');
-                    breakStartBtn.classList.add('bg-stone-500', 'cursor-not-allowed');
+                    breakStartBtn.classList.remove('bg-[#a95ffc]', 'hover:bg-[#9947e6]', 'focus:ring-[#a95ffc]');
+                    breakStartBtn.classList.add('bg-[#9947e6]', 'cursor-not-allowed');
                     breakEndBtn.disabled = true;
-                    breakEndBtn.classList.remove('bg-stone-700', 'hover:bg-stone-600', 'focus:ring-stone-500');
-                    breakEndBtn.classList.add('bg-stone-500', 'cursor-not-allowed');
+                    breakEndBtn.classList.remove('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
+                    breakEndBtn.classList.add('bg-[#c90064]', 'cursor-not-allowed');
                 }
 
                 if (appState.timeInLogged) {
-                    timeInInput.value = appState.timeInLogged;
-                    timeInDisplay.textContent = `Logged: ${new Date(appState.timeInLogged).toLocaleTimeString()}`;
+                    // NEW: Show both date and time in the display
+                    const date = new Date(appState.timeInLogged);
+                    timeInDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
                 }
                 if (appState.timeOutLogged) {
-                    timeOutInput.value = appState.timeOutLogged;
-                    timeOutDisplay.textContent = `Logged: ${new Date(appState.timeOutLogged).toLocaleTimeString()}`;
+                    // NEW: Show both date and time in the display
+                    const date = new Date(appState.timeOutLogged);
+                    timeOutDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
                 }
                 if (appState.breaksTotal > 0) {
                     breaksInput.value = appState.breaksTotal;
@@ -372,7 +375,8 @@
                                 let errorMessage = 'Location access denied.';
                                 switch(error.code) {
                                     case error.PERMISSION_DENIED:
-                                        errorMessage = "Location access was denied by the user.";
+                                        // MODIFIED ERROR MESSAGE
+                                        errorMessage = "Location access was denied. Please enable it in your browser settings.";
                                         break;
                                     case error.POSITION_UNAVAILABLE:
                                         errorMessage = "Location information is unavailable.";
@@ -414,7 +418,8 @@
             timeInBtn.addEventListener('click', async () => {
                 if (appState.timeInLogged) return;
                 appState.timeInLogged = new Date().toISOString();
-                timeInDisplay.textContent = `Logged: ${new Date(appState.timeInLogged).toLocaleTimeString()}`;
+                const date = new Date(appState.timeInLogged);
+                timeInDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
                 await getLocation();
                 captureCamera();
                 saveState();
@@ -424,7 +429,8 @@
             timeOutBtn.addEventListener('click', async () => {
                 if (appState.timeOutLogged) return;
                 appState.timeOutLogged = new Date().toISOString();
-                timeOutDisplay.textContent = `Logged: ${new Date(appState.timeOutLogged).toLocaleTimeString()}`;
+                const date = new Date(appState.timeOutLogged);
+                timeOutDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
                 await getLocation();
                 captureCamera();
                 saveState();
