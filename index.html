@@ -61,4 +61,352 @@
                     <button type="button" id="time-in-btn" class="w-full btn bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
                         Log Time In
                     </button>
-                    <div id="time-in-display" class
+                    <div id="time-in-display" class="mt-2 text-center text-gray-500 italic"></div>
+                    <input type="hidden" id="time_in" name="time_in">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Out</label>
+                    <button type="button" id="time-out-btn" class="w-full btn bg-red-400 cursor-not-allowed" disabled>
+                        Log Time Out
+                    </button>
+                    <div id="time-out-display" class="mt-2 text-center text-gray-500 italic"></div>
+                    <input type="hidden" id="time_out" name="time_out">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Breaks</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" id="break-start-btn" class="btn bg-blue-400 cursor-not-allowed" disabled>
+                        Start Break
+                    </button>
+                    <button type="button" id="break-end-btn" class="btn bg-blue-400 cursor-not-allowed" disabled>
+                        End Break
+                    </button>
+                </div>
+                <div id="breaks-display" class="mt-2 text-center text-gray-500 italic"></div>
+                <input type="hidden" id="breaks" name="breaks">
+            </div>
+
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <input type="hidden" id="location" name="location">
+                <div id="location-display" class="mt-2 text-center text-gray-500 italic">Location will be automatically logged.</div>
+            </div>
+
+            <div>
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Add any relevant notes here." class="form-input"></textarea>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Camera Capture (Automatic)</label>
+                <input type="hidden" id="camera_capture" name="camera_capture">
+                <div id="camera-message" class="text-sm text-center text-gray-500 italic"></div>
+            </div>
+        </form>
+
+        <div id="message-box" class="mt-8 p-4 rounded-lg text-center font-medium hidden"></div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('time-logger-form');
+            const messageBox = document.getElementById('message-box');
+            
+            const cameraInput = document.getElementById('camera_capture');
+            const cameraMessage = document.getElementById('camera-message');
+
+            const timeInBtn = document.getElementById('time-in-btn');
+            const timeInInput = document.getElementById('time_in');
+            const timeInDisplay = document.getElementById('time-in-display');
+
+            const timeOutBtn = document.getElementById('time-out-btn');
+            const timeOutInput = document.getElementById('time_out');
+            const timeOutDisplay = document.getElementById('time-out-display');
+
+            const breakStartBtn = document.getElementById('break-start-btn');
+            const breakEndBtn = document.getElementById('break-end-btn');
+            const breaksInput = document.getElementById('breaks');
+            const breaksDisplay = document.getElementById('breaks-display');
+            let breakStartTime = null;
+
+            const locationInput = document.getElementById('location');
+            const locationDisplay = document.getElementById('location-display');
+
+            const currentTimeDisplay = document.getElementById('current-time');
+
+            // --- IMPORTANT: FIX THE WEBHOOK URL ---
+            // The "Failed to fetch" error occurs because this URL is a placeholder.
+            // You MUST replace it with the actual URL from your Make.com or similar service.
+            const webhookUrl = "https://your-webhook-url.com/replace-me-with-your-real-url";
+
+            // Function to display messages in the message box
+            function showMessage(message, type) {
+                messageBox.classList.remove('hidden', 'bg-red-200', 'text-red-800', 'bg-green-200', 'text-green-800', 'bg-blue-200', 'text-blue-800');
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-200', 'text-green-800');
+                } else if (type === 'error') {
+                    messageBox.classList.add('bg-red-200', 'text-red-800');
+                } else if (type === 'info') {
+                    messageBox.classList.add('bg-blue-200', 'text-blue-800');
+                }
+                messageBox.textContent = message;
+            }
+
+            // Function to handle camera capture
+            function captureCamera() {
+                const timestamp = new Date().toISOString();
+                const placeholderUrl = `https://placehold.co/200x200/cccccc/000000?text=Captured+at+${encodeURIComponent(timestamp)}`;
+                cameraInput.value = placeholderUrl;
+                cameraMessage.textContent = 'Capture simulated. A placeholder image URL has been generated.';
+            }
+
+            // Function to send data to the webhook
+            async function sendLog(logType) {
+                // Check if the webhook URL is the placeholder.
+                if (webhookUrl.includes('replace-me-with-your-real-url')) {
+                    const errorMessage = "Error: Please replace the placeholder 'webhookUrl' in the code with your actual webhook URL.";
+                    console.error(errorMessage);
+                    showMessage(errorMessage, 'error');
+                    return;
+                }
+
+                // Get form data
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                // Set the log type and a timestamp
+                const now = new Date();
+                data.log_type = logType;
+                data.timestamp = now.toISOString();
+
+                // Construct the URL with query parameters
+                const params = new URLSearchParams(data);
+                const finalUrl = `${webhookUrl}?${params.toString()}`;
+                
+                // For debugging: log the URL to see what is being sent
+                console.log('Sending data to:', finalUrl);
+
+                showMessage(`Logging ${logType}...`, 'info');
+                
+                try {
+                    const response = await fetch(finalUrl, { method: 'GET' });
+
+                    if (response.ok) {
+                        showMessage(`Success! ${logType} submitted.`, 'success');
+                        // Update local storage and button state after successful log
+                        saveState();
+                        updateButtonStates();
+                    } else {
+                        throw new Error(`Server returned status: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Error submitting data:', error);
+                    showMessage('Failed to log time. Please check the webhook URL and your network connection.', 'error');
+                }
+            }
+            
+            // Local Storage and State Management
+            let appState = {
+                date: new Date().toLocaleDateString(),
+                timeInLogged: false,
+                timeOutLogged: false,
+                breakActive: false,
+                breaksTotal: 0
+            };
+
+            function saveState() {
+                localStorage.setItem('timeLoggerAppState', JSON.stringify(appState));
+            }
+
+            function loadState() {
+                const storedState = JSON.parse(localStorage.getItem('timeLoggerAppState'));
+                const today = new Date().toLocaleDateString();
+
+                if (storedState && storedState.date === today) {
+                    appState = storedState;
+                    console.log('App state loaded from local storage for today.');
+                    console.log('Current state:', appState);
+                } else {
+                    // Reset state for a new day
+                    localStorage.removeItem('timeLoggerAppState');
+                    console.log('No app state found for today. Starting fresh.');
+                }
+            }
+
+            function updateButtonStates() {
+                // Time In button state
+                if (appState.timeInLogged) {
+                    timeInBtn.disabled = true;
+                    timeInBtn.classList.remove('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-300');
+                    timeInBtn.classList.add('bg-green-400', 'cursor-not-allowed');
+                    console.log('Time In button is disabled because a "Time In" event has already been logged today.');
+                } else {
+                    timeInBtn.disabled = false;
+                    timeInBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-300');
+                    timeInBtn.classList.remove('bg-green-400', 'cursor-not-allowed');
+                }
+                
+                // Time Out button state
+                // This condition ensures the "Time Out" button is only enabled after "Time In" is logged
+                if (appState.timeInLogged && !appState.timeOutLogged) {
+                    timeOutBtn.disabled = false;
+                    timeOutBtn.classList.remove('bg-red-400', 'cursor-not-allowed');
+                    timeOutBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
+                } else {
+                    timeOutBtn.disabled = true;
+                    timeOutBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
+                    timeOutBtn.classList.add('bg-red-400', 'cursor-not-allowed');
+                }
+
+                // Break button states
+                // These buttons are only enabled after "Time In" is logged and before "Time Out"
+                if (appState.timeInLogged && !appState.timeOutLogged) {
+                    if (appState.breakActive) {
+                        breakStartBtn.disabled = true;
+                        breakStartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                        breakStartBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+
+                        breakEndBtn.disabled = false;
+                        breakEndBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
+                        breakEndBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                    } else {
+                        breakStartBtn.disabled = false;
+                        breakStartBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
+                        breakStartBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                        
+                        breakEndBtn.disabled = true;
+                        breakEndBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                        breakEndBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                    }
+                } else {
+                    breakStartBtn.disabled = true;
+                    breakStartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                    breakStartBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+
+                    breakEndBtn.disabled = true;
+                    breakEndBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                    breakEndBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                }
+
+                // Update displays from state
+                if (appState.timeInLogged) {
+                    timeInInput.value = appState.timeInLogged;
+                    timeInDisplay.textContent = `Logged: ${new Date(appState.timeInLogged).toLocaleTimeString()}`;
+                }
+                if (appState.timeOutLogged) {
+                    timeOutInput.value = appState.timeOutLogged;
+                    timeOutDisplay.textContent = `Logged: ${new Date(appState.timeOutLogged).toLocaleTimeString()}`;
+                }
+                if (appState.breaksTotal > 0) {
+                    breaksInput.value = appState.breaksTotal;
+                    breaksDisplay.textContent = `Total break: ${appState.breaksTotal} minutes.`;
+                }
+                if (appState.breakActive) {
+                    breaksDisplay.textContent = 'Break in progress...';
+                }
+            }
+
+            // Function to get user location and then send the log
+            function getLocationAndLog() {
+                locationDisplay.textContent = 'Getting location...';
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            locationInput.value = `${lat},${lon}`;
+                            locationDisplay.textContent = `Location: ${lat}, ${lon}`;
+                            // Proceed with logging after getting location
+                            timeInLoggedWithLocation();
+                        },
+                        (error) => {
+                            console.error('Geolocation request failed:', error);
+                            locationInput.value = 'Location access denied or unknown.';
+                            locationDisplay.textContent = 'Location access denied or unknown.';
+                            // Proceed with logging even if location fails
+                            timeInLoggedWithLocation();
+                        }
+                    );
+                } else {
+                    locationInput.value = 'Geolocation not supported by browser.';
+                    locationDisplay.textContent = 'Geolocation not supported by browser.';
+                    // Proceed with logging
+                    timeInLoggedWithLocation();
+                }
+            }
+            
+            async function timeInLoggedWithLocation() {
+                if (appState.timeInLogged) return; // Prevent double logging
+                appState.timeInLogged = new Date().toISOString();
+                captureCamera();
+                await sendLog('time_in');
+            }
+
+            // Function to update the current time display
+            function updateCurrentTime() {
+                const now = new Date();
+                const formattedTime = now.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true,
+                    timeZone: 'Asia/Manila' // Set the time zone to Philippines
+                });
+                currentTimeDisplay.textContent = `Current Time: ${formattedTime}`;
+            }
+
+            // --- Event Listeners ---
+            timeInBtn.addEventListener('click', () => {
+                getLocationAndLog();
+            });
+
+            timeOutBtn.addEventListener('click', async () => {
+                if (appState.timeOutLogged) return; // Prevent double logging
+                appState.timeOutLogged = new Date().toISOString();
+                captureCamera();
+                await sendLog('time_out');
+            });
+
+            breakStartBtn.addEventListener('click', async () => {
+                if (appState.breakActive) return; // Prevent double logging
+                breakStartTime = new Date();
+                appState.breakActive = true;
+                breaksDisplay.textContent = 'Break in progress...';
+                captureCamera();
+                await sendLog('break_start');
+            });
+
+            breakEndBtn.addEventListener('click', async () => {
+                if (!appState.breakActive) {
+                    breaksDisplay.textContent = 'Please start a break first.';
+                    return;
+                }
+                
+                const breakEndTime = new Date();
+                const breakDurationMs = breakEndTime - breakStartTime;
+                const breakDurationMinutes = Math.round(breakDurationMs / 60000);
+                
+                appState.breaksTotal += breakDurationMinutes;
+                appState.breakActive = false;
+                breakStartTime = null;
+
+                breaksInput.value = appState.breaksTotal;
+                breaksDisplay.textContent = `Total break: ${appState.breaksTotal} minutes.`;
+                
+                captureCamera();
+                await sendLog('break_end');
+            });
+            
+            // Initial load
+            loadState();
+            updateButtonStates();
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000); // Update time every second
+        });
+    </script>
+
+</body>
+</html>
