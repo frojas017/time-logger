@@ -43,10 +43,9 @@
     <main class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 sm:p-10">
         <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">Time Logger</h1>
         <p class="text-center text-gray-500 mb-8">
-            Click the buttons below to automatically log your time and send data to the .
+            Click the buttons below to automatically log your time and send data to the webhook.
         </p>
-        
-        <!-- New element to display the current time -->
+
         <div id="current-time" class="text-xl sm:text-2xl font-bold text-gray-600 text-center mb-4"></div>
 
         <form id="time-logger-form" class="space-y-6">
@@ -54,7 +53,7 @@
                 <label for="employee_name" class="block text-sm font-medium text-gray-700 mb-1">Employee Name</label>
                 <input type="text" id="employee_name" name="employee_name" placeholder="John Doe" class="form-input" required>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Time In</label>
@@ -114,7 +113,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('time-logger-form');
             const messageBox = document.getElementById('message-box');
-            
+
             const cameraInput = document.getElementById('camera_capture');
             const cameraMessage = document.getElementById('camera-message');
 
@@ -137,10 +136,8 @@
 
             const currentTimeDisplay = document.getElementById('current-time');
 
-            // --- IMPORTANT: FIX THE  URL ---
-            // The "Failed to fetch" error occurs because this URL is a placeholder.
-            // You MUST replace it with the actual URL from your Make.com or similar service.
-            const Url = "https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih";
+            // --- IMPORTANT: FIX THE URL ---
+            const webhookUrl = "https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih";
 
             // Function to display messages in the message box
             function showMessage(message, type) {
@@ -163,41 +160,34 @@
                 cameraMessage.textContent = 'Capture simulated. A placeholder image URL has been generated.';
             }
 
-            // Function to send data to the 
+            // Function to send data to the webhook
             async function sendLog(logType) {
-                
-                // Check if the  URL is the placeholder.
-                if (webhookUrl.includes(https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih)) {
+
+                if (webhookUrl.includes("https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih")) {
                     const errorMessage = "Error: Please replace the placeholder 'webhookUrl' in the code with your actual webhook URL.";
                     console.error(errorMessage);
                     showMessage(errorMessage, 'error');
                     return;
                 }
 
-                // Get form data
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData.entries());
 
-                // Set the log type and a timestamp
                 const now = new Date();
                 data.log_type = logType;
                 data.timestamp = now.toISOString();
 
-                // Construct the URL with query parameters
                 const params = new URLSearchParams(data);
                 const finalUrl = `${webhookUrl}?${params.toString()}`;
-                
-                // For debugging: log the URL to see what is being sent
-                console.log('Sending data to:', finalUrl);
 
+                console.log('Sending data to:', finalUrl);
                 showMessage(`Logging ${logType}...`, 'info');
-                
+
                 try {
                     const response = await fetch(finalUrl, { method: 'GET' });
 
                     if (response.ok) {
                         showMessage(`Success! ${logType} submitted.`, 'success');
-                        // Update local storage and button state after successful log
                         saveState();
                         updateButtonStates();
                     } else {
@@ -208,12 +198,12 @@
                     showMessage('Failed to log time. Please check the webhook URL and your network connection.', 'error');
                 }
             }
-            
+
             // Local Storage and State Management
             let appState = {
                 date: new Date().toLocaleDateString(),
-                timeInLogged: false,
-                timeOutLogged: false,
+                timeInLogged: null,
+                timeOutLogged: null,
                 breakActive: false,
                 breaksTotal: 0
             };
@@ -229,81 +219,86 @@
                 if (storedState && storedState.date === today) {
                     appState = storedState;
                 } else {
-                    // Reset state for a new day
                     localStorage.removeItem('timeLoggerAppState');
                 }
             }
 
             function updateButtonStates() {
-                // Time In button state
-                if (appState.timeInLogged) {
-                    timeInBtn.disabled = true;
+                // Disable all buttons initially for a clean slate
+                timeInBtn.disabled = true;
+                timeOutBtn.disabled = true;
+                breakStartBtn.disabled = true;
+                breakEndBtn.disabled = true;
+
+                // Rule 1: Allow "Time In" if a session is not active or has been clocked out
+                if (!appState.timeInLogged || appState.timeOutLogged) {
+                    timeInBtn.disabled = false;
+                    timeInBtn.classList.remove('bg-green-400', 'cursor-not-allowed');
+                    timeInBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-300');
+                } else {
                     timeInBtn.classList.remove('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-300');
                     timeInBtn.classList.add('bg-green-400', 'cursor-not-allowed');
                 }
-                
-                // Time Out button state
-                // This condition ensures the "Time Out" button is only enabled after "Time In" is logged
+
+                // Rule 2: Allow "Time Out" and "Breaks" after "Time In"
                 if (appState.timeInLogged && !appState.timeOutLogged) {
                     timeOutBtn.disabled = false;
+                    breakStartBtn.disabled = false;
+
                     timeOutBtn.classList.remove('bg-red-400', 'cursor-not-allowed');
                     timeOutBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
+
+                    breakStartBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
+                    breakStartBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
                 } else {
-                    timeOutBtn.disabled = true;
                     timeOutBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
                     timeOutBtn.classList.add('bg-red-400', 'cursor-not-allowed');
+
+                    breakStartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+                    breakStartBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
                 }
 
-                // Break button states
-                // These buttons are only enabled after "Time In" is logged and before "Time Out"
-                if (appState.timeInLogged && !appState.timeOutLogged) {
-                    if (appState.breakActive) {
-                        breakStartBtn.disabled = true;
-                        breakStartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                        breakStartBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
-
-                        breakEndBtn.disabled = false;
-                        breakEndBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
-                        breakEndBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                    } else {
-                        breakStartBtn.disabled = false;
-                        breakStartBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
-                        breakStartBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                        
-                        breakEndBtn.disabled = true;
-                        breakEndBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                        breakEndBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
-                    }
-                } else {
+                // Rule 3: Handle the break button sequence
+                if (appState.breakActive) {
                     breakStartBtn.disabled = true;
+                    breakEndBtn.disabled = false;
+
                     breakStartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
                     breakStartBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
 
-                    breakEndBtn.disabled = true;
-                    breakEndBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
-                    breakEndBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                    breakEndBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
+                    breakEndBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
                 }
 
                 // Update displays from state
                 if (appState.timeInLogged) {
                     timeInInput.value = appState.timeInLogged;
                     timeInDisplay.textContent = `Logged: ${new Date(appState.timeInLogged).toLocaleTimeString()}`;
+                } else {
+                    timeInDisplay.textContent = '';
                 }
+
                 if (appState.timeOutLogged) {
                     timeOutInput.value = appState.timeOutLogged;
                     timeOutDisplay.textContent = `Logged: ${new Date(appState.timeOutLogged).toLocaleTimeString()}`;
+                } else {
+                    timeOutDisplay.textContent = '';
                 }
+
                 if (appState.breaksTotal > 0) {
                     breaksInput.value = appState.breaksTotal;
                     breaksDisplay.textContent = `Total break: ${appState.breaksTotal} minutes.`;
+                } else {
+                    breaksDisplay.textContent = '';
                 }
+                
                 if (appState.breakActive) {
                     breaksDisplay.textContent = 'Break in progress...';
                 }
             }
 
             // Function to get user location and then send the log
-            function getLocationAndLog() {
+            function getLocationAndLog(logType) {
                 locationDisplay.textContent = 'Getting location...';
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(
@@ -313,31 +308,40 @@
                             locationInput.value = `${lat},${lon}`;
                             locationDisplay.textContent = `Location: ${lat}, ${lon}`;
                             // Proceed with logging after getting location
-                            timeInLoggedWithLocation();
+                            timeLoggedWithLocation(logType);
                         },
                         (error) => {
                             console.error('Geolocation request failed:', error);
                             locationInput.value = 'Location access denied or unknown.';
                             locationDisplay.textContent = 'Location access denied or unknown.';
                             // Proceed with logging even if location fails
-                            timeInLoggedWithLocation();
+                            timeLoggedWithLocation(logType);
                         }
                     );
                 } else {
                     locationInput.value = 'Geolocation not supported by browser.';
                     locationDisplay.textContent = 'Geolocation not supported by browser.';
                     // Proceed with logging
-                    timeInLoggedWithLocation();
+                    timeLoggedWithLocation(logType);
                 }
             }
             
-            async function timeInLoggedWithLocation() {
-                if (appState.timeInLogged) return; // Prevent double logging
-                appState.timeInLogged = new Date().toISOString();
-                captureCamera();
-                await sendLog('time_in');
-            }
+            async function timeLoggedWithLocation(logType) {
+                const now = new Date().toISOString();
+                
+                // Set the state based on the log type
+                if (logType === 'time_in') {
+                    appState.timeInLogged = now;
+                    appState.timeOutLogged = null; // Clear time out log for a new session
+                    appState.breaksTotal = 0; // Reset breaks for a new session
+                } else if (logType === 'time_out') {
+                    appState.timeOutLogged = now;
+                }
 
+                captureCamera();
+                await sendLog(logType);
+            }
+            
             // Function to update the current time display
             function updateCurrentTime() {
                 const now = new Date();
@@ -346,25 +350,26 @@
                     minute: '2-digit',
                     second: '2-digit',
                     hour12: true,
-                    timeZone: 'Asia/Manila' // Set the time zone to Philippines
+                    timeZone: 'Asia/Manila'
                 });
                 currentTimeDisplay.textContent = `Current Time: ${formattedTime}`;
             }
-
+            
             // --- Event Listeners ---
             timeInBtn.addEventListener('click', () => {
-                getLocationAndLog();
+                if (form.checkValidity()) {
+                    getLocationAndLog('time_in');
+                } else {
+                    showMessage('Please enter your Employee Name.', 'error');
+                }
             });
 
             timeOutBtn.addEventListener('click', async () => {
-                if (appState.timeOutLogged) return; // Prevent double logging
-                appState.timeOutLogged = new Date().toISOString();
-                captureCamera();
-                await sendLog('time_out');
+                getLocationAndLog('time_out');
             });
 
             breakStartBtn.addEventListener('click', async () => {
-                if (appState.breakActive) return; // Prevent double logging
+                if (appState.breakActive) return;
                 breakStartTime = new Date();
                 appState.breakActive = true;
                 breaksDisplay.textContent = 'Break in progress...';
@@ -377,31 +382,28 @@
                     breaksDisplay.textContent = 'Please start a break first.';
                     return;
                 }
-                
+
                 const breakEndTime = new Date();
                 const breakDurationMs = breakEndTime - breakStartTime;
                 const breakDurationMinutes = Math.round(breakDurationMs / 60000);
-                
+
                 appState.breaksTotal += breakDurationMinutes;
                 appState.breakActive = false;
                 breakStartTime = null;
 
                 breaksInput.value = appState.breaksTotal;
                 breaksDisplay.textContent = `Total break: ${appState.breaksTotal} minutes.`;
-                
+
                 captureCamera();
                 await sendLog('break_end');
             });
-            
+
             // Initial load
             loadState();
             updateButtonStates();
             updateCurrentTime();
-            setInterval(updateCurrentTime, 1000); // Update time every second
+            setInterval(updateCurrentTime, 1000);
         });
     </script>
-
 </body>
 </html>
-
-
