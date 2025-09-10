@@ -3,480 +3,1134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Logger</title>
+    <title>Time Logger & Invoice Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            color: #d1d5db; /* A light gray for text */
-            /* Removed solid background color in favor of gradient */
+            background-color: #0f172a;
         }
-        h1 {
-            font-family: 'Permanent Marker', cursive;
-            color: #ff007f; /* Neon pink fill inside the outline */
-            text-shadow: 
-                -2px -2px 0 #fff,  
-                2px -2px 0 #fff,
-                -2px 2px 0 #fff,
-                2px 2px 0 #fff; /* White outline effect */
+        .tab-content.hidden {
+            display: none;
         }
-        .form-input {
+        /* Updated gradients for a more vibrant, modern look */
+        .text-gradient-blue-cyan {
+            background-image: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-gradient-blue-cyan {
+            background-image: linear-gradient(to right, #6366f1, #a855f7);
+        }
+        .bg-gradient-purple-pink {
+            background-image: linear-gradient(to right, #a855f7, #ec4899);
+        }
+        .bg-gradient-green-teal {
+            background-image: linear-gradient(to right, #10b981, #14b8a6);
+        }
+        /* Enhanced tab button hover effect and centering */
+        .tab-btn {
+            display: flex; /* Added flexbox */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            position: relative;
+            padding: 0; /* Reset padding */
+            overflow: hidden; /* Hide overflowing text */
+            transition: all 0.3s ease-in-out; /* Smooth transition */
+            height: 48px; /* Fixed height for consistent look */
+            width: 48px; /* Fixed width for icon-only state */
+        }
+        .tab-btn .tab-text {
+            display: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        .tab-btn:hover {
+            width: 100% !important; /* Expand on hover */
+            padding: 0 16px; /* Add padding for text */
+        }
+        .tab-btn:hover .tab-text {
+            display: inline-block;
+            position: static;
+            transform: none;
+            margin-left: 8px; /* Space between icon and text */
+        }
+        .tab-btn:hover .tab-icon {
+            display: inline-block;
+        }
+        .tab-btn.active {
+            background-image: linear-gradient(to right, #a855f7, #ec4899);
+        }
+        /* Subtle glow on hover for buttons */
+        .btn-glow:hover {
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(168, 85, 247, 0.5);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        
+        .flip-card {
+            background-color: transparent;
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #4a4e69; /* Darker border */
-            background-color: #2b2b48; /* Darker background */
-            color: #d1d5db; /* Light text */
-            transition: border-color 0.2s, box-shadow 0.2s;
+            height: 100%;
+            perspective: 1000px;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #ff007f; /* Neon pink focus */
-            box-shadow: 0 0 0 3px rgba(255, 0, 127, 0.5); /* Neon pink shadow */
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
         }
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateX(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .flip-card-front {
+            background: linear-gradient(145deg, #1f2937, #111827);
             color: white;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transform: rotateX(0deg);
         }
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        .message-box {
+
+        .flip-card-back {
+            background: linear-gradient(145deg, #111827, #1f2937);
             color: white;
+            transform: rotateX(180deg);
         }
-        .message-box.success {
-            background-color: rgba(30, 150, 90, 0.5); /* Semi-transparent muted green */
-            color: #d1fae5;
-        }
-        .message-box.error {
-            background-color: rgba(180, 50, 50, 0.5); /* Semi-transparent muted red */
-            color: #fee2e2;
-        }
-        .message-box.info {
-            background-color: rgba(60, 80, 160, 0.5); /* Semi-transparent muted blue */
-            color: #dbeafe;
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: #fff;
+                margin: 0;
+                padding: 20px;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .printable-content {
+                display: block;
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .invoice-header input, .invoice-header textarea {
+                border: 1px solid #e5e7eb !important;
+            }
+            .line-item-input {
+                border: 1px solid transparent !important;
+                padding: 8px;
+            }
+            #invoice-form {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+            }
         }
     </style>
 </head>
-<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen" style="background-image: linear-gradient(to bottom, #1a1a2e, #805ad5);">
+<body class="bg-slate-950 text-gray-100 p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
 
-    <main class="w-full max-w-2xl bg-[#2b2b48] rounded-xl shadow-2xl p-6 sm:p-10">
-        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6">TIME LOGGER</h1>
-        <p class="text-center text-gray-400 mb-8">
-            Click the buttons below to automatically log your time and send data to the webhook.
-        </p>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, collection, onSnapshot, query, setDoc, orderBy, getDocs, updateDoc, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        setLogLevel('debug');
+
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        let app, db, auth;
+        let userId = ''; // This will hold the full Firebase User ID
+        let userProfile = {}; // Store user profile data
+        let isAuthReady = false;
+
+        const tabs = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const timeInBtn = document.getElementById('time-in-btn');
+        const timeOutBtn = document.getElementById('time-out-btn');
+        const breakStartBtn = document.getElementById('break-start-btn');
+        const breakEndBtn = document.getElementById('break-end-btn');
+        const timeInDisplay = document.getElementById('time-in-display');
+        const timeOutDisplay = document.getElementById('time-out-display');
+        const totalTimeWorkedDisplay = document.getElementById('total-time-worked');
+        const breaksDisplay = document.getElementById('breaks-display');
+        const historyTableBody = document.getElementById('history-table-body');
+        const generateInvoiceBtn = document.getElementById('generate-invoice-btn');
+        const employeeNameInput = document.getElementById('employee_name');
+        const notesInput = document.getElementById('notes');
+        const invoiceForm = document.getElementById('invoiceForm');
+        const webhookUrlInput = document.getElementById('webhookUrl');
+        const lineItemsContainer = document.getElementById('lineItems');
+        const publicNotesInput = document.getElementById('public-notes-input');
+        const postNoteBtn = document.getElementById('post-note-btn');
+        const publicNotesContainer = document.getElementById('public-notes-container');
+        const digitalClockDate = document.getElementById('digital-clock-date');
+        const digitalClockTime = document.getElementById('digital-clock-time');
         
-        <!-- New element to display the current time -->
-        <div id="current-time" class="text-xl sm:text-2xl font-bold text-[#a95ffc] text-center mb-4"></div>
+        // New Account elements
+        const accountForm = document.getElementById('account-form');
+        const accountEmailInput = document.getElementById('account-email');
+        const accountPasswordInput = document.getElementById('account-password');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const authStatus = document.getElementById('auth-status');
+        const accountDetails = document.getElementById('account-details');
 
-        <form id="time-logger-form" class="space-y-6">
-            <div>
-                <label for="employee_name" class="block text-sm font-medium text-gray-400 mb-1">Employee Name</label>
-                <input type="text" id="employee_name" name="employee_name" placeholder="John Doe" class="form-input" required>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Time In</label>
-                    <button type="button" id="time-in-btn" class="w-full btn bg-[#805ad5] hover:bg-[#6b46c1] focus:outline-none focus:ring-4 focus:ring-[#805ad5]">
-                        LOG TIME IN
-                    </button>
-                    <div id="time-in-display" class="mt-2 text-center text-gray-400 italic"></div>
-                    <!-- No longer using single hidden inputs, but keeping them for now -->
-                    <input type="hidden" id="time_in" name="time_in">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Time Out</label>
-                    <button type="button" id="time-out-btn" class="w-full btn bg-[#ff007f] hover:bg-[#c90064] focus:outline-none focus:ring-4 focus:ring-[#ff007f] cursor-not-allowed" disabled>
-                        LOG OUT
-                    </button>
-                    <div id="time-out-display" class="mt-2 text-center text-gray-400 italic"></div>
-                    <!-- No longer using single hidden inputs, but keeping them for now -->
-                    <input type="hidden" id="time_out" name="time_out">
-                </div>
-            </div>
+        // New Profile elements
+        const userAvatar = document.getElementById('user-avatar');
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const profileForm = document.getElementById('profile-form');
+        const displayNameInput = document.getElementById('display-name-input');
+        const saveProfileBtn = document.getElementById('save-profile-btn');
 
-            <div>
-                <label class="block text-sm font-medium text-gray-400 mb-1">Breaks</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <button type="button" id="break-start-btn" class="btn bg-[#a95ffc] hover:bg-[#9947e6] focus:outline-none focus:ring-4 focus:ring-[#a95ffc]">
-                        START BREAK
-                    </button>
-                    <button type="button" id="break-end-btn" class="btn bg-[#c90064] hover:bg-[#a1004a] cursor-not-allowed" disabled>
-                        END BREAK
-                    </button>
-                </div>
-                <div id="breaks-display" class="mt-2 text-center text-gray-400 italic"></div>
-                <input type="hidden" id="breaks" name="breaks">
-            </div>
+        let timeIn = null;
+        let breaks = 0;
+        let breakStartTime = null;
+        let intervalId = null;
 
-            <div>
-                <label for="location" class="block text-sm font-medium text-gray-400 mb-1">Location</label>
-                <div id="location-display" class="mt-2 text-center text-gray-400 italic">Getting location...</div>
-                <input type="hidden" id="location" name="location">
-            </div>
-
-            <div>
-                <label for="notes" class="block text-sm font-medium text-gray-400 mb-1">Notes</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Add any relevant notes here." class="form-input"></textarea>
-            </div>
-
-            <div class="space-y-4">
-                <label class="block text-sm font-medium text-gray-400 mb-1">Camera Capture (Automatic)</label>
-                <input type="hidden" id="camera_capture" name="camera_capture">
-                <div id="camera-message" class="text-sm text-center text-gray-400 italic"></div>
-            </div>
-        </form>
-
-        <div id="message-box" class="mt-8 p-4 rounded-lg text-center font-medium hidden message-box"></div>
-
-    </main>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('time-logger-form');
-            const messageBox = document.getElementById('message-box');
-            
-            const cameraInput = document.getElementById('camera_capture');
-            const cameraMessage = document.getElementById('camera-message');
-
-            const timeInBtn = document.getElementById('time-in-btn');
-            const timeInInput = document.getElementById('time_in');
-            const timeInDisplay = document.getElementById('time-in-display');
-
-            const timeOutBtn = document.getElementById('time-out-btn');
-            const timeOutInput = document.getElementById('time_out');
-            const timeOutDisplay = document.getElementById('time-out-display');
-
-            const breakStartBtn = document.getElementById('break-start-btn');
-            const breakEndBtn = document.getElementById('break-end-btn');
-            const breaksInput = document.getElementById('breaks');
-            const breaksDisplay = document.getElementById('breaks-display');
-            let breakStartTime = null;
-
-            const locationInput = document.getElementById('location');
-            const locationDisplay = document.getElementById('location-display');
-
-            const currentTimeDisplay = document.getElementById('current-time');
-            
-            const webhookUrl = "https://hook.us2.make.com/jtlc2fq3zf0xy1ko2pp4ajqrtlmpxuih";
-
-            // Function to display messages in the message box
-            function showMessage(message, type) {
-                messageBox.classList.remove('hidden', 'success', 'error', 'info');
-                if (type === 'success') {
-                    messageBox.classList.add('success');
-                } else if (type === 'error') {
-                    messageBox.classList.add('error');
-                } else if (type === 'info') {
-                    messageBox.classList.add('info');
-                }
-                messageBox.textContent = message;
+        // Function to create and show a custom modal/message box
+        function showMessage(message, type = 'info') {
+            let bgColor, borderColor;
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-500';
+                    borderColor = 'border-green-700';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-500';
+                    borderColor = 'border-red-700';
+                    break;
+                case 'info':
+                default:
+                    bgColor = 'bg-blue-500';
+                    borderColor = 'border-blue-700';
+                    break;
             }
 
-            // Function to handle camera capture
-            function captureCamera() {
-                const timestamp = new Date().toISOString();
-                const placeholderUrl = `https://placehold.co/200x200/cccccc/000000?text=Captured+at+${encodeURIComponent(timestamp)}`;
-                cameraInput.value = placeholderUrl;
-                cameraMessage.textContent = 'Capture simulated. A placeholder image URL has been generated.';
-            }
+            const messageBox = document.createElement('div');
+            messageBox.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg border-l-4 ${bgColor} ${borderColor} z-50 transition-transform transform translate-x-full ease-out duration-300`;
+            messageBox.innerHTML = `<p class="text-white">${message}</p>`;
+
+            document.body.appendChild(messageBox);
             
-            // --- NEW: Function to format date and time separately ---
-            function formatDateTimeForWebhook(isoString) {
-                const date = new Date(isoString);
-                const year = date.getFullYear();
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const day = date.getDate().toString().padStart(2, '0');
-                const hours = date.getHours().toString().padStart(2, '0');
-                const minutes = date.getMinutes().toString().padStart(2, '0');
-                const seconds = date.getSeconds().toString().padStart(2, '0');
-                
-                return {
-                    date: `${year}-${month}-${day}`,
-                    time: `${hours}:${minutes}:${seconds}`
-                };
-            }
-            
-            // Function to simulate a reverse geocoding API call
-            async function reverseGeocode(latitude, longitude) {
-                locationDisplay.textContent = 'Converting coordinates to a location name...';
-                // In a real app, you would use a service like Google Maps Geocoding API here.
-                // Replace this with a real API call and your API key.
-                const simulatedLocation = `Makati City, Metro Manila, Philippines`;
-                return new Promise(resolve => {
-                    setTimeout(() => resolve(simulatedLocation), 1500); // Simulate a network delay
+            // Animate in
+            setTimeout(() => {
+                messageBox.style.transform = 'translateX(0)';
+            }, 10);
+
+            // Animate out and remove
+            setTimeout(() => {
+                messageBox.style.transform = 'translateX(calc(100% + 1rem))';
+                messageBox.addEventListener('transitionend', () => {
+                    messageBox.remove();
                 });
-            }
+            }, 3000);
+        }
 
+        // Initialize Firebase
+        async function initializeFirebase() {
+            try {
+                if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    
+                    onAuthStateChanged(auth, async (user) => {
+                        isAuthReady = true;
+                        if (user) {
+                            userId = user.uid;
+                            await loadUserProfile();
+                            userIdDisplay.textContent = userId;
+                            userEmailDisplay.textContent = user.email;
+                            
+                            const displayName = userProfile.displayName || user.email;
+                            authStatus.innerHTML = `Logged in as: <span class="font-semibold text-blue-300">${displayName}</span>`;
+                            displayNameInput.value = userProfile.displayName || '';
 
-            // --- Updated function to send a single, complete log on Time Out ---
-            async function sendCompleteLog() {
-                const timeInFormatted = formatDateTimeForWebhook(appState.timeInLogged);
-                const timeOutFormatted = formatDateTimeForWebhook(appState.timeOutLogged);
+                            accountForm.classList.add('hidden');
+                            accountDetails.classList.remove('hidden');
+                            await loadState();
+                            await loadUserSettings();
+                            setupInvoiceListener();
+                            setupHistoryListener();
+                            setupPublicNotesListener();
+                        } else {
+                            userId = '';
+                            userProfile = {};
+                            userIdDisplay.textContent = 'Not Logged In';
+                            userEmailDisplay.textContent = '';
+                            authStatus.textContent = 'Not logged in.';
+                            displayNameInput.value = '';
+                            accountForm.classList.remove('hidden');
+                            accountDetails.classList.add('hidden');
+                            // Load public data for unauthenticated users
+                            setupPublicNotesListener(); 
 
-                // Gather all the stored data, using the correct column mapping from your sheet.
-                const logData = {
-                    // This is the new mapping based on your column headers
-                    A: document.getElementById('employee_name').value,
-                    B: timeInFormatted.date,
-                    C: timeInFormatted.time,
-                    D: timeOutFormatted.date,
-                    E: timeOutFormatted.time,
-                    F: appState.breaksTotal,
-                    G: cameraInput.value,
-                    H: locationInput.value,
-                    I: document.getElementById('notes').value
-                };
-                
-                // Construct the URL with query parameters
-                const params = new URLSearchParams(logData);
-                const finalUrl = `${webhookUrl}?${params.toString()}`;
-                
-                console.log('Sending complete log to:', finalUrl);
-                showMessage('Sending complete time log...', 'info');
-                
-                try {
-                    const response = await fetch(finalUrl, { method: 'GET' });
-
-                    if (response.ok) {
-                        showMessage('Success! Your complete time log has been submitted.', 'success');
-                        // Clear local storage for a new day
-                        localStorage.removeItem('timeLoggerAppState');
-                    } else {
-                        throw new Error(`Server returned status: ${response.status}`);
-                    }
-                } catch (error) {
-                    console.error('Error submitting data:', error);
-                    showMessage('Failed to log time. Please check the webhook URL and your network connection.', 'error');
+                            // Sign in anonymously as a fallback for the Canvas environment
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        }
+                    });
+                } else {
+                    showMessage("Firebase configuration is missing.", 'error');
                 }
+            } catch (e) {
+                showMessage(`Error initializing Firebase: ${e.message}`, 'error');
+                console.error("Firebase initialization error:", e);
             }
+        }
+
+        async function loadUserProfile() {
+            if (!userId) return;
+            try {
+                const profileRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'details');
+                const docSnap = await getDoc(profileRef);
+                if (docSnap.exists()) {
+                    userProfile = docSnap.data();
+                } else {
+                    userProfile = {};
+                }
+                updateProfileUI();
+            } catch (e) {
+                console.error("Error loading user profile:", e);
+            }
+        }
+        
+        async function updateProfileUI() {
+            const displayName = userProfile.displayName || 'Anonymous User';
+            const avatarUrl = userProfile.avatarUrl || 'https://placehold.co/400x400/312e81/ffffff?text=❄️';
             
-            // Local Storage and State Management
-            let appState = {
-                date: new Date().toLocaleDateString(),
-                timeInLogged: false,
-                timeOutLogged: false,
-                breakActive: false,
-                breaksTotal: 0
+            displayNameInput.value = userProfile.displayName || '';
+            userAvatar.src = avatarUrl;
+            userAvatar.onerror = () => { userAvatar.src = 'https://placehold.co/400x400/312e81/ffffff?text=❄️'; };
+            
+            authStatus.innerHTML = `Logged in as: <span class="font-semibold text-blue-300">${displayName}</span>`;
+        }
+        
+        async function saveUserProfile() {
+            if (!userId) {
+                showMessage("Please log in to save your profile.", 'error');
+                return;
+            }
+            try {
+                const profileRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'details');
+                const newProfile = {
+                    displayName: displayNameInput.value || null,
+                    avatarUrl: userProfile.avatarUrl || 'https://placehold.co/400x400/312e81/ffffff?text=❄️' // Use the default icon
+                };
+                await setDoc(profileRef, newProfile);
+                userProfile = newProfile;
+                updateProfileUI();
+                showMessage('Profile saved successfully!', 'success');
+            } catch (e) {
+                showMessage(`Error saving profile: ${e.message}`, 'error');
+                console.error("Error saving profile:", e);
+            }
+        }
+        
+        saveProfileBtn.addEventListener('click', saveUserProfile);
+        
+        async function loadUserSettings() {
+            if (!userId) return;
+            try {
+                const settingsRef = doc(db, 'artifacts', appId, 'users', userId, 'settings', 'userProfile');
+                const docSnap = await getDoc(settingsRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.webhookUrl) {
+                        webhookUrlInput.value = data.webhookUrl;
+                    }
+                }
+            } catch (e) {
+                console.error("Error loading user settings:", e);
+            }
+        }
+
+        async function saveUserSettings() {
+            if (!userId) return;
+            try {
+                const settingsRef = doc(db, 'artifacts', appId, 'users', userId, 'settings', 'userProfile');
+                await setDoc(settingsRef, { webhookUrl: webhookUrlInput.value }, { merge: true });
+            } catch (e) {
+                console.error("Error saving user settings:", e);
+            }
+        }
+
+        async function saveState() {
+            if (!userId) return;
+            try {
+                const stateRef = doc(db, 'artifacts', appId, 'users', userId, 'state', 'timer');
+                await setDoc(stateRef, {
+                    timeIn: timeIn ? timeIn.toISOString() : null,
+                    breaks: breaks,
+                    breakStartTime: breakStartTime ? breakStartTime.toISOString() : null
+                });
+            } catch (e) {
+                console.error("Error saving state:", e);
+            }
+        }
+
+        async function loadState() {
+            if (!userId) return;
+            try {
+                const stateRef = doc(db, 'artifacts', appId, 'users', userId, 'state', 'timer');
+                const docSnap = await getDoc(stateRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    timeIn = data.timeIn ? new Date(data.timeIn) : null;
+                    breaks = data.breaks || 0;
+                    breakStartTime = data.breakStartTime ? new Date(data.breakStartTime) : null;
+                }
+                updateUI();
+                if (timeIn) {
+                    startTimer();
+                }
+            } catch (e) {
+                console.error("Error loading state:", e);
+            }
+        }
+
+        function formatTime(ms) {
+            const hours = Math.floor(ms / (1000 * 60 * 60));
+            const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateUI() {
+            const now = new Date();
+            const timeInDate = timeIn ? new Date(timeIn) : null;
+            const timeOutDate = now;
+            
+            timeInDisplay.textContent = timeInDate ? timeInDate.toLocaleTimeString() : 'N/A';
+            breaksDisplay.textContent = formatTime(breaks);
+
+            if (timeInDate) {
+                const workTime = now - timeInDate - breaks;
+                totalTimeWorkedDisplay.textContent = formatTime(workTime);
+            } else {
+                totalTimeWorkedDisplay.textContent = formatTime(0);
+            }
+
+            if (timeIn) {
+                timeInBtn.disabled = true;
+                timeOutBtn.disabled = false;
+                breakStartBtn.disabled = breakStartTime !== null;
+                breakEndBtn.disabled = breakStartTime === null;
+            } else {
+                timeInBtn.disabled = false;
+                timeOutBtn.disabled = true;
+                breakStartBtn.disabled = true;
+                breakEndBtn.disabled = true;
+            }
+
+            timeOutDisplay.textContent = timeIn ? now.toLocaleTimeString() : 'N/A';
+        }
+
+        function startTimer() {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            intervalId = setInterval(updateUI, 1000);
+        }
+        
+        // --- Digital Clock Logic ---
+        function updateDigitalClock() {
+            const now = new Date();
+            const timeOptions = {
+                timeZone: 'Asia/Manila', // Philippine Time
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            const dateOptions = {
+                timeZone: 'Asia/Manila',
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+            };
+            const phDate = now.toLocaleDateString('en-US', dateOptions);
+            const phTime = now.toLocaleTimeString('en-US', timeOptions);
+            
+            digitalClockDate.textContent = phDate;
+            digitalClockTime.textContent = phTime;
+        }
+
+        setInterval(updateDigitalClock, 1000);
+        updateDigitalClock(); // Initial call to display the clock immediately
+        
+        // Time tracking functions
+        timeInBtn.addEventListener('click', () => {
+            timeIn = new Date();
+            breaks = 0;
+            breakStartTime = null;
+            saveState();
+            startTimer();
+            showMessage('Time In logged!', 'success');
+        });
+
+        timeOutBtn.addEventListener('click', async () => {
+            if (!timeIn) {
+                showMessage("Please log in first.", 'error');
+                return;
+            }
+
+            if (breakStartTime) {
+                breaks += new Date() - breakStartTime;
+                breakStartTime = null;
+            }
+
+            const timeOut = new Date();
+            const totalWorkTime = timeOut - timeIn - breaks;
+            const employeeName = employeeNameInput.value || (userProfile.displayName || 'N/A');
+            const notes = notesInput.value || 'N/A';
+            
+            const logEntry = {
+                name: employeeName,
+                date: timeIn.toLocaleDateString(),
+                timeIn: timeIn.toLocaleTimeString(),
+                timeOut: timeOut.toLocaleTimeString(),
+                breaks: formatTime(breaks),
+                total: formatTime(totalWorkTime),
+                createdAt: new Date()
             };
 
-            function saveState() {
-                localStorage.setItem('timeLoggerAppState', JSON.stringify(appState));
+            await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'timelogs'), logEntry);
+
+            timeIn = null;
+            breaks = 0;
+            clearInterval(intervalId);
+            updateUI();
+            saveState();
+            showMessage('Time Out logged and entry saved!', 'success');
+        });
+
+        breakStartBtn.addEventListener('click', () => {
+            if (!timeIn) {
+                showMessage("Please log in first.", 'error');
+                return;
             }
+            breakStartTime = new Date();
+            saveState();
+            showMessage('Break started.', 'info');
+        });
 
-            function loadState() {
-                const storedState = JSON.parse(localStorage.getItem('timeLoggerAppState'));
-                const today = new Date().toLocaleDateString();
-
-                if (storedState && storedState.date === today) {
-                    appState = storedState;
-                    console.log('App state loaded from local storage for today.');
-                } else {
-                    localStorage.removeItem('timeLoggerAppState');
-                    console.log('No app state found for today. Starting fresh.');
-                }
+        breakEndBtn.addEventListener('click', () => {
+            if (!breakStartTime) {
+                showMessage("Break has not started.", 'error');
+                return;
             }
+            breaks += new Date() - breakStartTime;
+            breakStartTime = null;
+            saveState();
+            showMessage('Break ended.', 'info');
+        });
 
-            function updateButtonStates() {
-                if (appState.timeInLogged) {
-                    timeInBtn.disabled = true;
-                    timeInBtn.classList.remove('bg-[#805ad5]', 'hover:bg-[#6b46c1]', 'focus:ring-[#805ad5]');
-                    timeInBtn.classList.add('bg-[#6b46c1]', 'cursor-not-allowed');
-                } else {
-                    timeInBtn.disabled = false;
-                    timeInBtn.classList.add('bg-[#805ad5]', 'hover:bg-[#6b46c1]', 'focus:ring-[#805ad5]');
-                    timeInBtn.classList.remove('bg-[#6b46c1]', 'cursor-not-allowed');
-                }
+        // Tab switching logic
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.dataset.tab;
                 
-                if (appState.timeInLogged && !appState.timeOutLogged) {
-                    timeOutBtn.disabled = false;
-                    timeOutBtn.classList.remove('bg-[#c90064]', 'cursor-not-allowed');
-                    timeOutBtn.classList.add('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
-                } else {
-                    timeOutBtn.disabled = true;
-                    timeOutBtn.classList.remove('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
-                    timeOutBtn.classList.add('bg-[#c90064]', 'cursor-not-allowed');
-                }
-
-                if (appState.timeInLogged && !appState.timeOutLogged) {
-                    if (appState.breakActive) {
-                        breakStartBtn.disabled = true;
-                        breakStartBtn.classList.remove('bg-[#a95ffc]', 'hover:bg-[#9947e6]', 'focus:ring-[#a95ffc]');
-                        breakStartBtn.classList.add('bg-[#9947e6]', 'cursor-not-allowed');
-                        breakEndBtn.disabled = false;
-                        breakEndBtn.classList.remove('bg-[#c90064]', 'cursor-not-allowed');
-                        breakEndBtn.classList.add('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
-                    } else {
-                        breakStartBtn.disabled = false;
-                        breakStartBtn.classList.remove('bg-[#9947e6]', 'cursor-not-allowed');
-                        breakStartBtn.classList.add('bg-[#a95ffc]', 'hover:bg-[#9947e6]', 'focus:ring-[#a95ffc]');
-                        breakEndBtn.disabled = true;
-                        breakEndBtn.classList.remove('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
-                        breakEndBtn.classList.add('bg-[#c90064]', 'cursor-not-allowed');
-                    }
-                } else {
-                    breakStartBtn.disabled = true;
-                    breakStartBtn.classList.remove('bg-[#a95ffc]', 'hover:bg-[#9947e6]', 'focus:ring-[#a95ffc]');
-                    breakStartBtn.classList.add('bg-[#9947e6]', 'cursor-not-allowed');
-                    breakEndBtn.disabled = true;
-                    breakEndBtn.classList.remove('bg-[#ff007f]', 'hover:bg-[#c90064]', 'focus:ring-[#ff007f]');
-                    breakEndBtn.classList.add('bg-[#c90064]', 'cursor-not-allowed');
-                }
-
-                if (appState.timeInLogged) {
-                    // NEW: Show both date and time in the display
-                    const date = new Date(appState.timeInLogged);
-                    timeInDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-                }
-                if (appState.timeOutLogged) {
-                    // NEW: Show both date and time in the display
-                    const date = new Date(appState.timeOutLogged);
-                    timeOutDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-                }
-                if (appState.breaksTotal > 0) {
-                    breaksInput.value = appState.breaksTotal;
-                    breaksDisplay.textContent = `Total break: ${appState.breaksTotal} minutes.`;
-                }
-                if (appState.breakActive) {
-                    breaksDisplay.textContent = 'Break in progress...';
-                }
-            }
-
-            function getLocation() {
-                locationDisplay.textContent = 'Getting location...';
-                return new Promise((resolve, reject) => {
-                    if ("geolocation" in navigator) {
-                        navigator.geolocation.getCurrentPosition(
-                            async (position) => {
-                                console.log('Geolocation success!');
-                                const lat = position.coords.latitude;
-                                const lon = position.coords.longitude;
-                                try {
-                                    const locationName = await reverseGeocode(lat, lon);
-                                    locationInput.value = locationName;
-                                    locationDisplay.textContent = `Location: ${locationName}`;
-                                    resolve();
-                                } catch (error) {
-                                    const errorMessage = 'Failed to convert location to name.';
-                                    console.error(errorMessage, error);
-                                    locationInput.value = errorMessage;
-                                    locationDisplay.textContent = errorMessage;
-                                    resolve(); // Resolve to not block the process
-                                }
-                            },
-                            (error) => {
-                                let errorMessage = 'Location access denied.';
-                                switch(error.code) {
-                                    case error.PERMISSION_DENIED:
-                                        // MODIFIED ERROR MESSAGE
-                                        errorMessage = "Location access was denied. Please enable it in your browser settings.";
-                                        break;
-                                    case error.POSITION_UNAVAILABLE:
-                                        errorMessage = "Location information is unavailable.";
-                                        break;
-                                    case error.TIMEOUT:
-                                        errorMessage = "The request to get user location timed out.";
-                                        break;
-                                }
-                                console.error('Geolocation request failed:', errorMessage, error);
-                                locationInput.value = errorMessage;
-                                locationDisplay.textContent = errorMessage;
-                                resolve(); // Resolve even on error to continue the process
-                            }
-                        );
-                    } else {
-                        const errorMessage = 'Geolocation is not supported by this browser.';
-                        console.error(errorMessage);
-                        locationInput.value = errorMessage;
-                        locationDisplay.textContent = errorMessage;
-                        resolve();
-                    }
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
                 });
-            }
-
-            // Function to update the current time display
-            function updateCurrentTime() {
-                const now = new Date();
-                const formattedTime = now.toLocaleTimeString('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true,
-                    timeZone: 'Asia/Manila'
+                
+                tabs.forEach(t => {
+                    t.classList.remove('active', 'bg-gradient-purple-pink', 'text-white');
+                    t.classList.add('bg-slate-700', 'text-gray-300', 'hover:bg-slate-600');
                 });
-                currentTimeDisplay.textContent = `Current Time: ${formattedTime}`;
+                
+                document.getElementById(tabId).classList.remove('hidden');
+                tab.classList.remove('bg-slate-700', 'text-gray-300', 'hover:bg-slate-600');
+                tab.classList.add('active', 'bg-gradient-purple-pink', 'text-white');
+            });
+        });
+
+        // Function to send data to webhook
+        async function sendWebhook(invoiceData) {
+            const url = webhookUrlInput.value;
+            if (!url) {
+                showMessage("Webhook URL is not provided.", 'info');
+                return;
             }
 
-            // --- Event Listeners ---
-            timeInBtn.addEventListener('click', async () => {
-                if (appState.timeInLogged) return;
-                appState.timeInLogged = new Date().toISOString();
-                const date = new Date(appState.timeInLogged);
-                timeInDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-                await getLocation();
-                captureCamera();
-                saveState();
-                updateButtonStates();
-            });
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(invoiceData),
+                });
 
-            timeOutBtn.addEventListener('click', async () => {
-                if (appState.timeOutLogged) return;
-                appState.timeOutLogged = new Date().toISOString();
-                const date = new Date(appState.timeOutLogged);
-                timeOutDisplay.textContent = `Logged: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-                await getLocation();
-                captureCamera();
-                saveState();
-                await sendCompleteLog(); // This is the new behavior
-                updateButtonStates();
-            });
-
-            breakStartBtn.addEventListener('click', () => {
-                if (appState.breakActive) return;
-                breakStartTime = new Date();
-                appState.breakActive = true;
-                breaksDisplay.textContent = 'Break in progress...';
-                captureCamera();
-                saveState();
-                updateButtonStates();
-            });
-
-            breakEndBtn.addEventListener('click', () => {
-                if (!appState.breakActive) {
-                    breaksDisplay.textContent = 'Please start a break first.';
-                    return;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const breakEndTime = new Date();
-                const breakDurationMs = breakEndTime - breakStartTime;
-                const breakDurationMinutes = Math.round(breakDurationMs / 60000);
-                
-                appState.breaksTotal += breakDurationMinutes;
-                appState.breakActive = false;
-                breakStartTime = null;
+                showMessage('Webhook sent successfully!', 'success');
+            } catch (e) {
+                showMessage(`Failed to send webhook: ${e.message}`, 'error');
+                console.error("Webhook send error:", e);
+            }
+        }
 
-                breaksInput.value = appState.breaksTotal;
-                breaksDisplay.textContent = `Total break: ${appState.breaksTotal} minutes.`;
+        // Generate invoice logic
+        generateInvoiceBtn.addEventListener('click', async () => {
+            // Get all time log entries from Firestore
+            const timelogsRef = collection(db, 'artifacts', appId, 'users', userId, 'timelogs');
+            const q = query(timelogsRef, orderBy('createdAt', 'asc'));
+            const querySnapshot = await getDocs(q);
+            const logs = [];
+            let totalHours = 0;
+
+            querySnapshot.forEach(doc => {
+                const log = doc.data();
+                // Ensure correct calculation based on log data
+                const timeInDate = new Date(`1970/01/01 ${log.timeIn}`);
+                const timeOutDate = new Date(`1970/01/01 ${log.timeOut}`);
+                const breakTimeParts = log.breaks.split(':').map(Number);
+                const breakTimeInMs = (breakTimeParts[0] * 3600 + breakTimeParts[1] * 60 + breakTimeParts[2]) * 1000;
                 
-                captureCamera();
-                saveState();
-                updateButtonStates();
+                const netWorkTimeInMs = timeOutDate.getTime() - timeInDate.getTime() - breakTimeInMs;
+                const netWorkHours = netWorkTimeInMs / (1000 * 60 * 60);
+                totalHours += netWorkHours;
+                logs.push(log);
             });
             
-            // Initial load
-            loadState();
-            updateButtonStates();
-            updateCurrentTime();
-            setInterval(updateCurrentTime, 1000);
+            if (logs.length === 0) {
+                showMessage("No time logs to generate an invoice from.", 'info');
+                return;
+            }
+            
+            // Get next invoice number
+            const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'counters');
+            const docSnap = await getDoc(settingsRef);
+            let nextNumber = 1;
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                nextNumber = (data.lastInvoiceNumber || 0) + 1;
+            }
+
+            const invoiceNumber = `INV-${nextNumber.toString().padStart(5, '0')}`;
+            const customerName = employeeNameInput.value || (userProfile.displayName || 'Client Name');
+            const hourlyRate = parseFloat(document.getElementById('hourly-rate').value) || 1000;
+            const amount = totalHours * hourlyRate;
+            const createdAt = new Date().toISOString();
+
+            // Create invoice data object
+            const invoiceData = {
+                invoiceNumber: invoiceNumber,
+                customerName: customerName,
+                amount: amount.toFixed(2),
+                createdAt: createdAt,
+                lineItems: logs.map(log => ({
+                    description: `${log.name} - ${log.notes}`,
+                    quantity: log.total,
+                    unitPrice: hourlyRate
+                }))
+            };
+
+            // Save the invoice to Firestore
+            await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'invoices'), invoiceData);
+            
+            // Atomically update the counter
+            await setDoc(settingsRef, { lastInvoiceNumber: nextNumber }, { merge: true });
+
+            showMessage('Invoice generated and saved!', 'success');
+
+            // Send webhook
+            await sendWebhook(invoiceData);
         });
+
+        // Populate history tab with real-time data
+        function setupHistoryListener() {
+            if (!userId) return;
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'users', userId, 'timelogs'), orderBy('createdAt', 'desc'));
+                onSnapshot(q, (querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        historyTableBody.innerHTML = '<tr><td colspan="7" class="text-center p-6 text-gray-500">No time logs found.</td></tr>';
+                        generateInvoiceBtn.disabled = true;
+                    } else {
+                        historyTableBody.innerHTML = '';
+                        querySnapshot.forEach(doc => {
+                            const log = doc.data();
+                            const tr = document.createElement('tr');
+                            tr.className = 'border-b border-slate-600 last:border-b-0';
+                            tr.innerHTML = `
+                                <td class="p-3">${log.name}</td>
+                                <td class="p-3">${log.date}</td>
+                                <td class="p-3">${log.timeIn}</td>
+                                <td class="p-3">${log.timeOut}</td>
+                                <td class="p-3">${log.breaks}</td>
+                                <td class="p-3 font-semibold text-blue-300">${log.total}</td>
+                                <td class="p-3 text-center">
+                                    <button class="delete-log-btn text-red-500 hover:text-red-700 transition-colors" data-id="${doc.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            historyTableBody.appendChild(tr);
+                        });
+                        generateInvoiceBtn.disabled = false;
+                    }
+                });
+            } catch (e) {
+                console.error("Error setting up history listener:", e);
+                historyTableBody.innerHTML = '<tr><td colspan="7" class="text-center p-6 text-red-500">Error loading history.</td></tr>';
+            }
+        }
+
+        // Populate invoice history with real-time data
+        function setupInvoiceListener() {
+            if (!userId) return;
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'users', userId, 'invoices'), orderBy('createdAt', 'desc'));
+                onSnapshot(q, (querySnapshot) => {
+                    lineItemsContainer.innerHTML = '';
+                    if (querySnapshot.empty) {
+                        // Display a message if no invoices are found
+                        const noDataRow = document.createElement('tr');
+                        noDataRow.innerHTML = `<td colspan="5" class="p-4 text-center text-gray-400">No invoices generated yet.</td>`;
+                        lineItemsContainer.appendChild(noDataRow);
+                        return;
+                    }
+
+                    querySnapshot.forEach(doc => {
+                        const invoice = doc.data();
+                        
+                        const invoiceRow = document.createElement('tr');
+                        invoiceRow.className = 'border-b border-slate-600 last:border-b-0';
+                        invoiceRow.innerHTML = `
+                            <td class="p-3 text-sm text-gray-300 font-semibold">${invoice.invoiceNumber}</td>
+                            <td class="p-3 text-sm text-gray-400">${invoice.customerName}</td>
+                            <td class="p-3 text-sm text-gray-400">${new Date(invoice.createdAt).toLocaleDateString()}</td>
+                            <td class="p-3 text-sm text-blue-300 font-bold">₱${invoice.amount}</td>
+                            <td class="p-3 text-center">
+                                <button class="delete-invoice-btn text-red-500 hover:text-red-700 transition-colors" data-id="${doc.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        lineItemsContainer.appendChild(invoiceRow);
+                    });
+                });
+            } catch (e) {
+                console.error("Error setting up invoice listener:", e);
+                lineItemsContainer.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-red-500">Error loading invoices.</td></tr>';
+            }
+        }
+        
+        // Handle delete button clicks for time logs
+        historyTableBody.addEventListener('click', async (e) => {
+            if (e.target.closest('.delete-log-btn')) {
+                const button = e.target.closest('.delete-log-btn');
+                const docId = button.dataset.id;
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'timelogs', docId));
+                    showMessage("Time log deleted.", 'info');
+                } catch (e) {
+                showMessage(`Error deleting time log: ${e.message}`, 'error');
+                console.error("Error deleting time log:", e);
+                }
+            }
+        });
+
+        // Handle delete button clicks for invoices
+        lineItemsContainer.addEventListener('click', async (e) => {
+            if (e.target.closest('.delete-invoice-btn')) {
+                const button = e.target.closest('.delete-invoice-btn');
+                const docId = button.dataset.id;
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'invoices', docId));
+                    showMessage("Invoice deleted.", 'info');
+                } catch (e) {
+                    showMessage(`Error deleting invoice: ${e.message}`, 'error');
+                    console.error("Error deleting invoice:", e);
+                }
+            }
+        });
+
+        // Save webhook URL on input change
+        webhookUrlInput.addEventListener('input', saveUserSettings);
+
+        // New logic for public notes
+        postNoteBtn.addEventListener('click', async () => {
+            if (!userId) {
+                showMessage("Please wait for authentication to complete.", 'error');
+                return;
+            }
+            const noteText = publicNotesInput.value.trim();
+            if (noteText === '') {
+                showMessage("Note cannot be empty.", 'info');
+                return;
+            }
+            try {
+                const displayName = userProfile.displayName || userId.slice(0, 6);
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'sharedNotes'), {
+                    text: noteText,
+                    author: displayName,
+                    avatarUrl: userProfile.avatarUrl || 'https://placehold.co/400x400/312e81/ffffff?text=❄️',
+                    createdAt: serverTimestamp()
+                });
+                publicNotesInput.value = '';
+                showMessage("Note posted successfully!", "success");
+            } catch (e) {
+                showMessage(`Error posting note: ${e.message}`, 'error');
+                console.error("Error posting note:", e);
+            }
+        });
+
+        function setupPublicNotesListener() {
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'sharedNotes'), orderBy('createdAt', 'desc'));
+                onSnapshot(q, (querySnapshot) => {
+                    publicNotesContainer.innerHTML = '';
+                    if (querySnapshot.empty) {
+                        publicNotesContainer.innerHTML = '<p class="text-center text-gray-500 py-4">No notes posted yet. Be the first!</p>';
+                    } else {
+                        querySnapshot.forEach(doc => {
+                            const note = doc.data();
+                            const noteElement = document.createElement('div');
+                            noteElement.className = 'bg-slate-700 p-4 rounded-xl shadow-sm mb-2 border border-slate-600 flex items-start gap-4';
+                            noteElement.innerHTML = `
+                                <img src="${note.avatarUrl || 'https://placehold.co/400x400/312e81/ffffff?text=❄️'}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                                <div>
+                                    <p class="text-xs text-gray-500 mt-0"><span class="text-blue-400 font-bold">${note.author}</span></p>
+                                    <p class="text-gray-200">${note.text}</p>
+                                </div>
+                            `;
+                            publicNotesContainer.appendChild(noteElement);
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error("Error setting up public notes listener:", e);
+                publicNotesContainer.innerHTML = '<p class="text-center text-red-500 py-4">Error loading notes.</p>';
+            }
+        }
+
+        // --- New Authentication Functions ---
+        loginBtn.addEventListener('click', async () => {
+            const email = accountEmailInput.value;
+            const password = accountPasswordInput.value;
+            if (!email || !password) {
+                showMessage("Please enter email and password.", 'error');
+                return;
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage("Logged in successfully!", 'success');
+            } catch (error) {
+                showMessage(`Login failed: ${error.message}`, 'error');
+                console.error("Login error:", error);
+            }
+        });
+
+        registerBtn.addEventListener('click', async () => {
+            const email = accountEmailInput.value;
+            const password = accountPasswordInput.value;
+            if (!email || !password) {
+                showMessage("Please enter email and password.", 'error');
+                return;
+            }
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessage("Account created and logged in!", 'success');
+            } catch (error) {
+                showMessage(`Registration failed: ${error.message}`, 'error');
+                console.error("Registration error:", error);
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                // Clear local state
+                timeIn = null;
+                breaks = 0;
+                breakStartTime = null;
+                clearInterval(intervalId);
+                updateUI();
+                showMessage("Logged out successfully.", 'info');
+            } catch (error) {
+                showMessage(`Logout failed: ${error.message}`, 'error');
+                console.error("Logout error:", error);
+            }
+        });
+
+        window.onload = initializeFirebase;
     </script>
 
+    <main class="w-full max-w-6xl bg-slate-800 rounded-3xl shadow-2xl shadow-indigo-500/10 overflow-hidden border border-slate-700 flex flex-col md:flex-row">
+        <!-- Vertical Tab Navigation Sidebar -->
+        <aside class="w-full md:w-24 p-4 md:p-6 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-700 transition-all duration-300 hover:w-56">
+            <header class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-100 mb-2 no-print">
+                    <span class="text-gradient-blue-cyan">
+                        <i class="fas fa-briefcase"></i>
+                    </span>
+                    <span class="text-gradient-blue-cyan tab-text hidden">Suite</span>
+                </h1>
+            </header>
+            
+            <div class="flex md:flex-col justify-center gap-2 no-print">
+                <button data-tab="time-logger" class="tab-btn px-5 py-2 rounded-full md:rounded-lg font-semibold transition-colors duration-200 bg-gradient-purple-pink text-white shadow-sm md:w-full">
+                    <i class="fas fa-clock tab-icon"></i><span class="tab-text hidden">Logger</span>
+                </button>
+                <button data-tab="history" class="tab-btn px-5 py-2 rounded-full md:rounded-lg font-semibold transition-colors duration-200 bg-slate-700 text-gray-300 shadow-sm hover:bg-slate-600 md:w-full">
+                    <i class="fas fa-history tab-icon"></i><span class="tab-text hidden">History</span>
+                </button>
+                <button data-tab="invoice-generator" class="tab-btn px-5 py-2 rounded-full md:rounded-lg font-semibold transition-colors duration-200 bg-slate-700 text-gray-300 shadow-sm hover:bg-slate-600 md:w-full">
+                    <i class="fas fa-file-invoice-dollar tab-icon"></i><span class="tab-text hidden">Invoice</span>
+                </button>
+                 <button data-tab="public-notes" class="tab-btn px-5 py-2 rounded-full md:rounded-lg font-semibold transition-colors duration-200 bg-slate-700 text-gray-300 shadow-sm hover:bg-slate-600 md:w-full">
+                    <i class="fas fa-users tab-icon"></i><span class="tab-text hidden">Public Notes</span>
+                </button>
+                <button data-tab="account" class="tab-btn px-5 py-2 rounded-full md:rounded-lg font-semibold transition-colors duration-200 bg-slate-700 text-gray-300 shadow-sm hover:bg-slate-600 md:w-full">
+                    <i class="fas fa-user-circle tab-icon"></i><span class="tab-text hidden">Account</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 p-6 sm:p-10">
+            <div id="message-box" class="hidden"></div>
+            
+            <header class="flex flex-col items-end mb-6">
+                <h2 class="text-3xl font-bold text-gray-100 mb-4 self-start">Time Log</h2>
+                <div class="w-full max-w-sm h-32 no-print">
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span id="digital-clock-date" class="text-xl font-mono text-purple-400"></span>
+                                <span id="digital-clock-time" class="text-4xl font-mono text-purple-400"></span>
+                            </div>
+                            <div class="flip-card-back">
+                                <span class="text-lg font-mono text-gray-400">Time Logger</span>
+                                <span class="text-xl font-mono text-gray-400">Invoice Generator</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section id="time-logger" class="tab-content">
+                <div class="bg-slate-700 p-6 rounded-xl shadow-inner mb-6 border border-slate-600">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="employee_name" class="block text-sm font-medium text-gray-400 mb-1">Employee Name</label>
+                            <input type="text" id="employee_name" class="w-full p-2 border border-slate-600 bg-slate-800 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Your Name">
+                        </div>
+                        <div>
+                            <label for="notes" class="block text-sm font-medium text-gray-400 mb-1">Notes</label>
+                            <input type="text" id="notes" class="w-full p-2 border border-slate-600 bg-slate-800 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="e.g., Project A">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <button id="time-in-btn" class="btn-glow p-4 bg-gradient-green-teal text-white font-bold rounded-xl shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed transition">
+                        <i class="fas fa-play"></i> Time In
+                    </button>
+                    <button id="time-out-btn" class="btn-glow p-4 bg-red-600 text-white font-bold rounded-xl shadow-md hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition">
+                        <i class="fas fa-stop"></i> Time Out
+                    </button>
+                    <button id="break-start-btn" class="btn-glow p-4 bg-yellow-500 text-white font-bold rounded-xl shadow-md hover:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition">
+                        <i class="fas fa-pause"></i> Start Break
+                    </button>
+                    <button id="break-end-btn" class="btn-glow p-4 bg-yellow-600 text-white font-bold rounded-xl shadow-md hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition">
+                        <i class="fas fa-pause-circle"></i> End Break
+                    </button>
+                </div>
+
+                <div class="bg-slate-700 p-4 rounded-xl shadow-inner mb-6 text-center border border-slate-600">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="p-2 bg-slate-800 rounded-lg"><p class="text-xs text-gray-400">Time In</p><p id="time-in-display" class="font-semibold text-gray-200"></p></div>
+                        <div class="p-2 bg-slate-800 rounded-lg"><p class="text-xs text-gray-400">Time Out</p><p id="time-out-display" class="font-semibold text-gray-200"></p></div>
+                        <div class="p-2 bg-slate-800 rounded-lg"><p class="text-xs text-gray-400">Breaks</p><p id="breaks-display" class="font-semibold text-gray-200"></p></div>
+                        <div class="p-2 bg-indigo-900 rounded-lg border border-indigo-800"><p class="text-xs text-indigo-300">Total Work</p><p id="total-time-worked" class="text-lg font-bold text-indigo-200"></p></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="history" class="tab-content hidden">
+               <div class="overflow-x-auto bg-slate-700 p-4 rounded-xl shadow-inner border border-slate-600">
+                    <table class="min-w-full text-gray-200">
+                        <thead class="border-b border-slate-600">
+                            <tr>
+                                <th class="p-3 text-left text-sm font-semibold text-gray-400">Name</th>
+                                <th class="p-3 text-left text-sm font-semibold text-gray-400">Date</th>
+                                <th class="p-3 text-left text-sm font-semibold text-gray-400">In</th>
+                                <th class="p-3 text-left text-sm font-semibold text-gray-400">Out</th>
+                                <th class="p-3 text-left text-sm font-semibold text-gray-400">Breaks</th>
+                                <th class="p-3 text-left text-sm font-semibold text-gray-400">Total</th>
+                                <th class="p-3 text-center text-sm font-semibold text-gray-400">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <tr><td colspan="7" class="text-center p-6 text-gray-500">Loading history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="invoice-generator" class="tab-content hidden">
+                <div id="invoice-form" class="printable-content bg-slate-800 p-6 sm:p-8 rounded-lg border border-slate-700 shadow-sm shadow-indigo-500/10">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="invoiceNumber" class="block text-sm font-medium text-gray-400 mb-1">Invoice #</label>
+                            <input type="text" id="invoiceNumber" class="w-full p-2 border border-slate-600 bg-slate-900 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Auto-generated" readonly>
+                        </div>
+                        <div>
+                            <label for="hourly-rate" class="block text-sm font-medium text-gray-400 mb-1">Hourly Rate (₱)</label>
+                            <input type="number" id="hourly-rate" class="w-full p-2 border border-slate-600 bg-slate-900 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" value="1000" min="0" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label for="webhookUrl" class="block text-sm font-medium text-gray-400 mb-1">Webhook URL (Optional)</label>
+                        <input type="url" id="webhookUrl" class="w-full p-2 border border-slate-600 bg-slate-900 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Enter webhook URL">
+                    </div>
+
+                    <div class="mt-8">
+                        <button id="generate-invoice-btn" class="w-full px-6 py-4 btn-glow bg-gradient-purple-pink text-white font-bold rounded-lg shadow-md hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            Generate & Save Invoice
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto bg-slate-700 p-4 rounded-xl shadow-inner mt-8 border border-slate-600">
+                        <h3 class="text-xl font-semibold text-gray-100 mb-4">Invoice History</h3>
+                        <table class="min-w-full text-gray-200">
+                            <thead class="border-b border-slate-600">
+                                <tr>
+                                    <th class="p-3 text-left text-sm font-semibold text-gray-400">Invoice #</th>
+                                    <th class="p-3 text-left text-sm font-semibold text-gray-400">Customer</th>
+                                    <th class="p-3 text-left text-sm font-semibold text-gray-400">Date</th>
+                                    <th class="p-3 text-left text-sm font-semibold text-gray-400">Amount</th>
+                                    <th class="p-3 text-center text-sm font-semibold text-gray-400">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lineItems"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="public-notes" class="tab-content hidden">
+                <h2 class="text-3xl font-bold text-gray-100 mb-6">Public Notes</h2>
+                <div class="bg-slate-700 p-6 rounded-xl shadow-inner mb-6 border border-slate-600">
+                    <label for="public-notes-input" class="block text-sm font-medium text-gray-400 mb-1">Post a Note</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="public-notes-input" class="flex-1 p-2 border border-slate-600 bg-slate-800 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Share your thoughts...">
+                        <button id="post-note-btn" class="btn-glow px-4 py-2 bg-gradient-blue-cyan text-white font-bold rounded-lg shadow-md hover:brightness-110 transition">
+                            Post
+                        </button>
+                    </div>
+                </div>
+                <div id="public-notes-container" class="bg-slate-700 p-4 rounded-xl shadow-inner border border-slate-600">
+                    <p class="text-center text-gray-500 py-4">No notes posted yet. Be the first!</p>
+                </div>
+            </section>
+
+            <section id="account" class="tab-content hidden">
+                <h2 class="text-3xl font-bold text-gray-100 mb-6">Account</h2>
+                
+                <div id="auth-status" class="bg-slate-700 p-4 rounded-xl shadow-inner mb-6 border border-slate-600 text-center text-gray-400">
+                    Loading authentication status...
+                </div>
+
+                <div id="account-form" class="bg-slate-700 p-6 rounded-xl shadow-inner border border-slate-600">
+                    <h3 class="text-xl font-semibold text-gray-100 mb-4">Sign Up or Log In</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="account-email" class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                            <input type="email" id="account-email" class="w-full p-2 border border-slate-600 bg-slate-800 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="account-password" class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                            <input type="password" id="account-password" class="w-full p-2 border border-slate-600 bg-slate-800 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="••••••••">
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button id="login-btn" class="flex-1 btn-glow p-3 bg-gradient-blue-cyan text-white font-bold rounded-lg shadow-md hover:brightness-110 transition">
+                                Log In
+                            </button>
+                            <button id="register-btn" class="flex-1 btn-glow p-3 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:brightness-110 transition">
+                                Register
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="account-details" class="bg-slate-700 p-6 rounded-xl shadow-inner border border-slate-600 hidden">
+                    <h3 class="text-xl font-semibold text-gray-100 mb-4">Account Details</h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <img id="user-avatar" src="" alt="User Avatar" class="w-16 h-16 rounded-full border-2 border-slate-600 object-cover">
+                        <div>
+                            <p class="text-sm text-gray-400">Email:</p>
+                            <p id="user-email-display" class="font-semibold text-gray-200"></p>
+                        </div>
+                    </div>
+                    
+                    <div id="profile-form" class="space-y-4">
+                        <h4 class="text-lg font-semibold text-gray-200">Edit Profile</h4>
+                        <div>
+                            <label for="display-name-input" class="block text-sm font-medium text-gray-400 mb-1">Display Name</label>
+                            <input type="text" id="display-name-input" class="w-full p-2 border border-slate-600 bg-slate-800 text-gray-200 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition" placeholder="e.g., bot">
+                        </div>
+                        <button id="save-profile-btn" class="w-full btn-glow p-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:brightness-110 transition">
+                            Save Profile
+                        </button>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-slate-600">
+                        <p class="text-sm text-gray-400">Your User ID:</p>
+                        <p id="user-id-display" class="font-semibold text-sm text-gray-200 break-all"></p>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <button id="logout-btn" class="w-full btn-glow p-3 bg-red-600 text-white font-bold rounded-lg shadow-md hover:brightness-110 transition">
+                            Log Out
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
 </body>
 </html>
